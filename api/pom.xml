@@ -7,7 +7,7 @@
     <artifactId>api</artifactId>
     <groupId>org.idstack</groupId>
     <packaging>war</packaging>
-    <version>${idstack.version}</version>
+    <version>1.0-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -16,6 +16,11 @@
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>org.idstack</groupId>
+            <artifactId>idstack-feature</artifactId>
+            <version>${idstack.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -34,7 +39,7 @@
     </dependencies>
 
     <build>
-        <finalName>api</finalName>
+        <finalName>relyingparty-webservice</finalName>
     </build>
 
     <properties>
