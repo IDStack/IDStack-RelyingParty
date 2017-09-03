@@ -38,6 +38,12 @@ public class APIHandler {
         return FeatureImpl.getFactory().getConfiguration(router.configFilePath, Constant.GlobalAttribute.BASIC_CONFIG_FILE_NAME, property);
     }
 
+    @RequestMapping(value = "/{version}/store", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String storeDocuments(@PathVariable("version") String version, @RequestBody String json, @RequestHeader("Token") String token) {
+        return router.storeDocuments(json, token);
+    }
+
     @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String evaluateDocument(@PathVariable("version") String version, @RequestBody String json) {

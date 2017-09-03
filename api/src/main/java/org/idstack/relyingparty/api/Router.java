@@ -22,6 +22,19 @@ import java.util.LinkedHashMap;
 public class Router {
 
     public final String configFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.GlobalAttribute.CONFIG_FILE_PATH);
+    public final String storeFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.GlobalAttribute.STORE_FILE_PATH);
+
+    public String storeDocuments(String json, String token) {
+        ArrayList<String> jsonList = new ArrayList<>();
+        JsonObject object = new JsonParser().parse(json).getAsJsonObject();
+
+        for (int i = 1; i <= object.size(); i++) {
+            jsonList.add(object.get(String.valueOf(i)).toString());
+        }
+
+        FeatureImpl.getFactory().storeDocuments(jsonList, storeFilePath, token);
+        return Constant.Status.OK + " - " + token;
+    }
 
     public String evaluateDocument(String json) {
 
