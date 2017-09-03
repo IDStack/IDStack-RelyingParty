@@ -39,7 +39,7 @@
     </dependencies>
 
     <build>
-        <finalName>relyingparty-webservice</finalName>
+        <finalName>relyingparty-api</finalName>
     </build>
 
     <properties>
