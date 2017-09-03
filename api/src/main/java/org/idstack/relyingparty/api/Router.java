@@ -1,11 +1,16 @@
 package org.idstack.relyingparty.api;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
+import org.idstack.relyingparty.Score;
 import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 /**
  * @author Chanaka Lakmal
@@ -19,7 +24,25 @@ public class Router {
     public final String configFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.GlobalAttribute.CONFIG_FILE_PATH);
 
     public String evaluateDocument(String json) {
-        return json;
+
+        ArrayList<String> jsonList = new ArrayList<>();
+        JsonObject object = new JsonParser().parse(json).getAsJsonObject();
+
+        for (int i = 1; i <= object.size(); i++) {
+            jsonList.add(object.get(String.valueOf(i)).toString());
+        }
+
+        LinkedHashMap<String, double[]> scores = new Score().getMultipleDocumentScore(jsonList);
+        StringBuffer stringBuffer = new StringBuffer();
+
+        for (String m : scores.keySet()) {
+            stringBuffer.append("Score for " + m + ":\n");
+            for (double score : scores.get(m)) {
+                stringBuffer.append(score + "\t");
+            }
+            stringBuffer.append("\n\n");
+        }
+        return stringBuffer.toString();
     }
 
     private FileInputStream getPropertiesFile() {
