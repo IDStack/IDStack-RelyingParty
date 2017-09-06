@@ -26,27 +26,35 @@ public class APIHandler {
         httpServletResponse.sendRedirect("http://idstack.one/relyingparty");
     }
 
-    @RequestMapping(value = "/{version}/saveconfig/basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/saveconfig/basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String saveBasicConfiguration(@PathVariable("version") String version, @RequestBody String json) {
+    public String saveBasicConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
+        if (!FeatureImpl.getFactory().validateRequest(version, router.apiKey, apikey))
+            return Constant.Status.ERROR_REQUEST;
         return FeatureImpl.getFactory().saveBasicConfiguration(router.configFilePath, json);
     }
 
     @RequestMapping(value = "/{version}/getconfig/{type}/{property}", method = RequestMethod.GET)
     @ResponseBody
     public Object getConfigurationFile(@PathVariable("version") String version, @PathVariable("type") String type, @PathVariable("property") String property) {
+        if (!FeatureImpl.getFactory().validateRequest(version))
+            return Constant.Status.ERROR_REQUEST;
         return FeatureImpl.getFactory().getConfiguration(router.configFilePath, Constant.GlobalAttribute.BASIC_CONFIG_FILE_NAME, property);
     }
 
     @RequestMapping(value = "/{version}/store", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String storeDocuments(@PathVariable("version") String version, @RequestBody String json, @RequestHeader("Token") String token) {
+        if (!FeatureImpl.getFactory().validateRequest(version))
+            return Constant.Status.ERROR_REQUEST;
         return router.storeDocuments(json, token);
     }
 
-    @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/evaluate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String evaluateDocument(@PathVariable("version") String version, @RequestBody String json) {
+    public String evaluateDocument(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
+        if (!FeatureImpl.getFactory().validateRequest(version, router.apiKey, apikey))
+            return Constant.Status.ERROR_REQUEST;
         return router.evaluateDocument(json);
     }
 }
