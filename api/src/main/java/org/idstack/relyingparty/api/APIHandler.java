@@ -39,7 +39,7 @@ public class APIHandler {
     public Object getConfigurationFile(@PathVariable("version") String version, @PathVariable("type") String type, @PathVariable("property") String property) {
         if (!FeatureImpl.getFactory().validateRequest(version))
             return Constant.Status.ERROR_REQUEST;
-        return FeatureImpl.getFactory().getConfiguration(router.configFilePath, Constant.GlobalAttribute.BASIC_CONFIG_FILE_NAME, property);
+        return FeatureImpl.getFactory().getConfiguration(router.configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME, property);
     }
 
     @RequestMapping(value = "/{version}/store", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)

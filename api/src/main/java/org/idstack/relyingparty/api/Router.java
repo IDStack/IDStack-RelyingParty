@@ -21,9 +21,9 @@ import java.util.LinkedHashMap;
 @Component
 public class Router {
 
-    public final String apiKey = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.GlobalAttribute.API_KEY);
-    public final String configFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.GlobalAttribute.CONFIG_FILE_PATH);
-    public final String storeFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.GlobalAttribute.STORE_FILE_PATH);
+    public final String apiKey = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.Configuration.API_KEY);
+    public final String configFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.Configuration.CONFIG_FILE_PATH);
+    public final String storeFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.Configuration.STORE_FILE_PATH);
 
     public String storeDocuments(String json, String token) {
         ArrayList<String> jsonList = new ArrayList<>();
@@ -61,7 +61,7 @@ public class Router {
 
     private FileInputStream getPropertiesFile() {
         try {
-            return new FileInputStream(getClass().getClassLoader().getResource(Constant.GlobalAttribute.SYSTEM_PROPERTIES_FILE_NAME).getFile());
+            return new FileInputStream(getClass().getClassLoader().getResource(Constant.Configuration.SYSTEM_PROPERTIES_FILE_NAME).getFile());
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
