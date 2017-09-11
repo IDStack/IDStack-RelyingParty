@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * @author Chanaka Lakmal
@@ -34,12 +35,12 @@ public class APIHandler {
         return FeatureImpl.getFactory().saveBasicConfiguration(router.configFilePath, json);
     }
 
-    @RequestMapping(value = "/{version}/{apikey}/getconfig/{type}/{property}", method = RequestMethod.GET)
+    @RequestMapping(value = {"/{version}/{apikey}/getconfig/{type}/{property}", "/{version}/{apikey}/getconfig/{type}/"}, method = RequestMethod.GET)
     @ResponseBody
-    public String getConfigurationFile(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @PathVariable("type") String type, @PathVariable("property") String property) {
+    public String getConfigurationFile(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @PathVariable("type") String type, @PathVariable("property") Optional<String> property) {
         if (!FeatureImpl.getFactory().validateRequest(version, router.apiKey, apikey))
             return Constant.Status.ERROR_REQUEST;
-        return FeatureImpl.getFactory().getConfiguration(router.configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME, property);
+        return FeatureImpl.getFactory().getConfigurationAsJson(router.configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME, property);
     }
 
     @RequestMapping(value = "/{version}/store", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
