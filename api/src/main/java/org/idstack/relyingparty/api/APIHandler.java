@@ -30,16 +30,20 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/saveconfig/basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String saveBasicConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
-        if (!FeatureImpl.getFactory().validateRequest(version, router.apiKey, apikey))
-            return Constant.Status.ERROR_REQUEST;
+        if (!FeatureImpl.getFactory().validateRequest(version))
+            return Constant.Status.STATUS_ERROR_VERSION;
+        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+            return Constant.Status.STATUS_ERROR_API_KEY;
         return FeatureImpl.getFactory().saveBasicConfiguration(router.configFilePath, json);
     }
 
     @RequestMapping(value = {"/{version}/{apikey}/getconfig/{type}/{property}", "/{version}/{apikey}/getconfig/{type}/"}, method = RequestMethod.GET)
     @ResponseBody
     public String getConfigurationFile(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @PathVariable("type") String type, @PathVariable("property") Optional<String> property) {
-        if (!FeatureImpl.getFactory().validateRequest(version, router.apiKey, apikey))
-            return Constant.Status.ERROR_REQUEST;
+        if (!FeatureImpl.getFactory().validateRequest(version))
+            return Constant.Status.STATUS_ERROR_VERSION;
+        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+            return Constant.Status.STATUS_ERROR_API_KEY;
         return FeatureImpl.getFactory().getConfigurationAsJson(router.configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME, property);
     }
 
@@ -47,15 +51,17 @@ public class APIHandler {
     @ResponseBody
     public String storeDocuments(@PathVariable("version") String version, @RequestBody String json, @RequestHeader("Token") String token) {
         if (!FeatureImpl.getFactory().validateRequest(version))
-            return Constant.Status.ERROR_REQUEST;
+            return Constant.Status.STATUS_ERROR_VERSION;
         return router.storeDocuments(json, token);
     }
 
     @RequestMapping(value = "/{version}/{apikey}/evaluate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String evaluateDocument(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
-        if (!FeatureImpl.getFactory().validateRequest(version, router.apiKey, apikey))
-            return Constant.Status.ERROR_REQUEST;
+        if (!FeatureImpl.getFactory().validateRequest(version))
+            return Constant.Status.STATUS_ERROR_VERSION;
+        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+            return Constant.Status.STATUS_ERROR_API_KEY;
         return router.evaluateDocument(json);
     }
 }
