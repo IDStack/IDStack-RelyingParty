@@ -37,7 +37,7 @@ public class APIHandler {
         return FeatureImpl.getFactory().saveBasicConfiguration(router.configFilePath, json);
     }
 
-    @RequestMapping(value = {"/{version}/{apikey}/getconfig/{type}/{property}", "/{version}/{apikey}/getconfig/{type}/"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/{version}/{apikey}/getconfig/{type}/{property}", "/{version}/{apikey}/getconfig/{type}"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getConfigurationFile(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @PathVariable("type") String type, @PathVariable("property") Optional<String> property) {
         if (!FeatureImpl.getFactory().validateRequest(version))
