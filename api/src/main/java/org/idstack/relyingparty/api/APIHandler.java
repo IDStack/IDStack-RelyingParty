@@ -65,4 +65,12 @@ public class APIHandler {
             return Constant.Status.STATUS_ERROR_API_KEY;
         return router.evaluateDocument(json);
     }
+
+    @RequestMapping(value = "/{version}/{apikey}/getdocstore", method = RequestMethod.GET)
+    @ResponseBody
+    public String getStoredDocuments(@PathVariable("version") String version) {
+        if (!FeatureImpl.getFactory().validateRequest(version))
+            return Constant.Status.STATUS_ERROR_VERSION;
+        return FeatureImpl.getFactory().getDocumentStore(router.storeFilePath);
+    }
 }
