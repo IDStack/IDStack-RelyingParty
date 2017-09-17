@@ -17,7 +17,7 @@ import java.util.*;
  */
 
 @SuppressWarnings("Duplicates")
-public class Score {
+public class CorrelationScore {
 
     /**
      * Calculates a score for a single document based on the document's signed attributes by signers.

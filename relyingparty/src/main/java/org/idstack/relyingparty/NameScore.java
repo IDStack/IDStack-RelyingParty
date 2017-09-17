@@ -132,8 +132,8 @@ public class NameScore {
 
                 double score = (orderScore + stringScore) / 2;
 
-                pairScores[i][j] = score;
-                pairScores[j][i] = score;
+                pairScores[i][j] = score * 100;
+                pairScores[j][i] = score * 100;
             }
         }
         ArrayList<Double> docScores = new ArrayList<>(nameCount);

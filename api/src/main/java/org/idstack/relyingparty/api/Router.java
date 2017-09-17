@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.document.MetaData;
-import org.idstack.relyingparty.Score;
+import org.idstack.relyingparty.CorrelationScore;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -40,11 +40,11 @@ public class Router {
             jsonList.add(object.get(String.valueOf(i)).toString());
         }
 
-        LinkedHashMap<String, double[]> scores = new Score().getMultipleDocumentScore(jsonList);
+        LinkedHashMap<String, double[]> scores = new CorrelationScore().getMultipleDocumentScore(jsonList);
         StringBuffer stringBuffer = new StringBuffer();
 
         for (String m : scores.keySet()) {
-            stringBuffer.append("Score for " + m + ":\n");
+            stringBuffer.append("CorrelationScore for " + m + ":\n");
             for (double score : scores.get(m)) {
                 stringBuffer.append(score + "\t");
             }
