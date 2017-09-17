@@ -56,14 +56,24 @@ public class APIHandler {
         return router.storeDocuments(request, json, email);
     }
 
-    @RequestMapping(value = "/{version}/{apikey}/evaluate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/confidence", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String evaluateDocument(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
+    public String getConfidenceScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
         if (!FeatureImpl.getFactory().validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
         if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
             return Constant.Status.STATUS_ERROR_API_KEY;
-        return router.evaluateDocument(json);
+        return router.getConfidenceScore(json);
+    }
+
+    @RequestMapping(value = "/{version}/{apikey}/correlation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String getCorrelationScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
+        if (!FeatureImpl.getFactory().validateRequest(version))
+            return Constant.Status.STATUS_ERROR_VERSION;
+        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+            return Constant.Status.STATUS_ERROR_API_KEY;
+        return router.getCorrelationScore(json);
     }
 
     @RequestMapping(value = "/{version}/{apikey}/getdocstore", method = RequestMethod.GET)

@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.document.MetaData;
+import org.idstack.relyingparty.ConfidenceScore;
 import org.idstack.relyingparty.CorrelationScore;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
@@ -31,17 +33,20 @@ public class Router {
     public final String configFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.Configuration.CONFIG_FILE_PATH);
     public final String storeFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.Configuration.STORE_FILE_PATH);
 
-    public String evaluateDocument(String json) {
+    public String getConfidenceScore(String json) {
+        HashMap<String, Double> score = new HashMap<>();
+        score.put("score", new ConfidenceScore().getSingleDocumentScore(json));
+        return new Gson().toJson(score);
+    }
 
+    public String getCorrelationScore(String json) {
         ArrayList<String> jsonList = new ArrayList<>();
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
-
         for (int i = 1; i <= object.size(); i++) {
             jsonList.add(object.get(String.valueOf(i)).toString());
         }
-
-        LinkedHashMap<String, double[]> scoreMap = new CorrelationScore().getMultipleDocumentScore(jsonList);
-        return new Gson().toJson(scoreMap);
+        LinkedHashMap<String, double[]> scores = new CorrelationScore().getMultipleDocumentScore(jsonList);
+        return new Gson().toJson(scores);
     }
 
     public String storeDocuments(MultipartHttpServletRequest request, String json, String email) throws IOException {
