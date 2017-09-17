@@ -40,17 +40,8 @@ public class Router {
             jsonList.add(object.get(String.valueOf(i)).toString());
         }
 
-        LinkedHashMap<String, double[]> scores = new CorrelationScore().getMultipleDocumentScore(jsonList);
-        StringBuffer stringBuffer = new StringBuffer();
-
-        for (String m : scores.keySet()) {
-            stringBuffer.append("CorrelationScore for " + m + ":\n");
-            for (double score : scores.get(m)) {
-                stringBuffer.append(score + "\t");
-            }
-            stringBuffer.append("\n\n");
-        }
-        return stringBuffer.toString();
+        LinkedHashMap<String, double[]> scoreMap = new CorrelationScore().getMultipleDocumentScore(jsonList);
+        return new Gson().toJson(scoreMap);
     }
 
     public String storeDocuments(MultipartHttpServletRequest request, String json, String email) throws IOException {

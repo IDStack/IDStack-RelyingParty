@@ -30,9 +30,9 @@ public class ConfidenceScore {
         }
 
         //else
-        int allSigns = 0;               //all validators
-        int contentSigns = 0;     //validators who signed the content
-        int signatureSigns = 0;   //validators whose ancestor signed the content
+        int allSigns = 0;           //all validators
+        int contentSigns = 0;       //validators who signed the content
+        int signatureSigns = 0;     //validators whose ancestor signed the content
 
         ArrayList<Validator> validators = doc.getValidators();
 
