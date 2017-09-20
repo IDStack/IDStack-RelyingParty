@@ -28,6 +28,14 @@ public class APIHandler {
         httpServletResponse.sendRedirect("http://docs.idstack.apiary.io/");
     }
 
+    /**
+     * Save the configurations received at the configured URL at idstack.properties file
+     *
+     * @param version api version
+     * @param apikey  api key
+     * @param json    json of configuration
+     * @return status of saving
+     */
     @RequestMapping(value = "/{version}/{apikey}/saveconfig/basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String saveConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
@@ -38,9 +46,18 @@ public class APIHandler {
         return FeatureImpl.getFactory().saveBasicConfiguration(router.configFilePath, json);
     }
 
+    /**
+     * Returned the saved configurations. If property is mentioned this returns only the mentioned property from the given type otherwise everything
+     *
+     * @param version  api version
+     * @param apikey   api key
+     * @param type     type of configuration [basic, document, whitelist, blacklist]
+     * @param property property of configuration
+     * @return configuration as json
+     */
     @RequestMapping(value = {"/{version}/{apikey}/getconfig/{type}/{property}", "/{version}/{apikey}/getconfig/{type}"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String getConfigurationFile(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @PathVariable("type") String type, @PathVariable("property") Optional<String> property) {
+    public String getConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @PathVariable("type") String type, @PathVariable("property") Optional<String> property) {
         if (!FeatureImpl.getFactory().validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
         if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
@@ -49,6 +66,17 @@ public class APIHandler {
     }
 
     //Access by the owner
+
+    /**
+     * Store the signed jsons + signed pdfs received for evaluate
+     *
+     * @param version api version
+     * @param json    set of signed jsons
+     * @param email   email of the sender
+     * @param request request object for access the signed pdf files
+     * @return status of saving
+     * @throws IOException if file cannot be converted into bytes
+     */
     @RequestMapping(value = "/{version}/store", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public String storeDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
@@ -57,6 +85,14 @@ public class APIHandler {
         return router.storeDocuments(request, json, email);
     }
 
+    /**
+     * Evaluate the confidence score of single json document
+     *
+     * @param version api version
+     * @param apikey  api key
+     * @param json    signed json
+     * @return confidence score
+     */
     @RequestMapping(value = "/{version}/{apikey}/confidence", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getConfidenceScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
@@ -67,6 +103,14 @@ public class APIHandler {
         return router.getConfidenceScore(json);
     }
 
+    /**
+     * Evaluate the correlation score of set of json documents
+     *
+     * @param version api version
+     * @param apikey  api key
+     * @param json    signed set of jsons
+     * @return correlation score
+     */
     @RequestMapping(value = "/{version}/{apikey}/correlation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getCorrelationScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
@@ -77,11 +121,20 @@ public class APIHandler {
         return router.getCorrelationScore(json);
     }
 
+    /**
+     * Get the stored documents in the configured store path
+     *
+     * @param version api version
+     * @param apikey  api key
+     * @return document list
+     */
     @RequestMapping(value = "/{version}/{apikey}/getdocstore", method = RequestMethod.GET)
     @ResponseBody
-    public String getStoredDocuments(@PathVariable("version") String version) {
+    public String getStoredDocuments(@PathVariable("version") String version, @PathVariable("apikey") String apikey) {
         if (!FeatureImpl.getFactory().validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
+        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+            return Constant.Status.STATUS_ERROR_API_KEY;
         return FeatureImpl.getFactory().getDocumentStore(router.storeFilePath);
     }
 }
