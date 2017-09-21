@@ -7,7 +7,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -21,7 +24,23 @@ import java.util.Optional;
 public class APIHandler {
 
     @Autowired
-    Router router;
+    private Router router;
+
+    @Autowired
+    private FeatureImpl feature;
+
+    private String apiKey;
+    private String configFilePath;
+    private String storeFilePath;
+    private FileInputStream inputStream;
+
+    @PostConstruct
+    void init() throws FileNotFoundException {
+        inputStream = new FileInputStream(getClass().getClassLoader().getResource(Constant.Configuration.SYSTEM_PROPERTIES_FILE_NAME).getFile());
+        apiKey = feature.getProperty(inputStream, Constant.Configuration.API_KEY);
+        configFilePath = feature.getProperty(inputStream, Constant.Configuration.CONFIG_FILE_PATH);
+        storeFilePath = feature.getProperty(inputStream, Constant.Configuration.STORE_FILE_PATH);
+    }
 
     @RequestMapping(value = {"/", "/{version}", "/{version}/{apikey}"})
     public void root(HttpServletResponse httpServletResponse) throws IOException {
@@ -39,11 +58,11 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/saveconfig/basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String saveConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
-        if (!FeatureImpl.getFactory().validateRequest(version))
+        if (!feature.validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
-        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+        if (!feature.validateRequest(apiKey, apikey))
             return Constant.Status.STATUS_ERROR_API_KEY;
-        return FeatureImpl.getFactory().saveBasicConfiguration(router.configFilePath, json);
+        return feature.saveBasicConfiguration(configFilePath, json);
     }
 
     /**
@@ -58,11 +77,11 @@ public class APIHandler {
     @RequestMapping(value = {"/{version}/{apikey}/getconfig/{type}/{property}", "/{version}/{apikey}/getconfig/{type}"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @PathVariable("type") String type, @PathVariable("property") Optional<String> property) {
-        if (!FeatureImpl.getFactory().validateRequest(version))
+        if (!feature.validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
-        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+        if (!feature.validateRequest(apiKey, apikey))
             return Constant.Status.STATUS_ERROR_API_KEY;
-        return FeatureImpl.getFactory().getConfigurationAsJson(router.configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME, property);
+        return feature.getConfigurationAsJson(configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME, property);
     }
 
     //Access by the owner
@@ -80,9 +99,9 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/store", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public String storeDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
-        if (!FeatureImpl.getFactory().validateRequest(version))
+        if (!feature.validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
-        return router.storeDocuments(request, json, email);
+        return router.storeDocuments(feature, storeFilePath, request, json, email);
     }
 
     /**
@@ -96,9 +115,9 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/confidence", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getConfidenceScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
-        if (!FeatureImpl.getFactory().validateRequest(version))
+        if (!feature.validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
-        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+        if (!feature.validateRequest(apiKey, apikey))
             return Constant.Status.STATUS_ERROR_API_KEY;
         return router.getConfidenceScore(json);
     }
@@ -114,9 +133,9 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/correlation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getCorrelationScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
-        if (!FeatureImpl.getFactory().validateRequest(version))
+        if (!feature.validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
-        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+        if (!feature.validateRequest(apiKey, apikey))
             return Constant.Status.STATUS_ERROR_API_KEY;
         return router.getCorrelationScore(json);
     }
@@ -131,10 +150,10 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/getdocstore", method = RequestMethod.GET)
     @ResponseBody
     public String getStoredDocuments(@PathVariable("version") String version, @PathVariable("apikey") String apikey) {
-        if (!FeatureImpl.getFactory().validateRequest(version))
+        if (!feature.validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
-        if (!FeatureImpl.getFactory().validateRequest(router.apiKey, apikey))
+        if (!feature.validateRequest(apiKey, apikey))
             return Constant.Status.STATUS_ERROR_API_KEY;
-        return FeatureImpl.getFactory().getDocumentStore(router.storeFilePath);
+        return feature.getDocumentStore(storeFilePath);
     }
 }

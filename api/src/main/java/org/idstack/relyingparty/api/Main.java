@@ -14,7 +14,8 @@ import org.springframework.context.annotation.Configuration;
  */
 
 @Configuration
-@ComponentScan
+@ComponentScan({"org.idstack.relyingparty"})
+@ComponentScan({"org.idstack.feature"})
 @EnableAutoConfiguration
 public class Main extends SpringBootServletInitializer {
 

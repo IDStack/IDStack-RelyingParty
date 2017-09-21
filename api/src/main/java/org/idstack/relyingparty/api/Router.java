@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,17 +27,13 @@ import java.util.UUID;
 @Component
 public class Router {
 
-    public final String apiKey = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.Configuration.API_KEY);
-    public final String configFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.Configuration.CONFIG_FILE_PATH);
-    public final String storeFilePath = FeatureImpl.getFactory().getProperty(getPropertiesFile(), Constant.Configuration.STORE_FILE_PATH);
-
-    public String getConfidenceScore(String json) {
+    protected String getConfidenceScore(String json) {
         HashMap<String, Double> score = new HashMap<>();
         score.put("score", new ConfidenceScore().getSingleDocumentScore(json));
         return new Gson().toJson(score);
     }
 
-    public String getCorrelationScore(String json) {
+    protected String getCorrelationScore(String json) {
         ArrayList<String> jsonList = new ArrayList<>();
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         for (int i = 1; i <= object.size(); i++) {
@@ -49,7 +43,7 @@ public class Router {
         return new Gson().toJson(scores);
     }
 
-    public String storeDocuments(MultipartHttpServletRequest request, String json, String email) throws IOException {
+    protected String storeDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email) throws IOException {
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
 
         if (object.size() != request.getFileMap().size()) {
@@ -61,9 +55,9 @@ public class Router {
             JsonObject metadataObject = doc.getAsJsonObject(Constant.JsonAttribute.META_DATA);
             MetaData metaData = new Gson().fromJson(metadataObject.toString(), MetaData.class);
             String uuid = UUID.randomUUID().toString();
-            FeatureImpl.getFactory().storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid);
+            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid);
             MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
-            FeatureImpl.getFactory().storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid);
+            feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid);
         }
 
         for (int i = 1; i <= request.getFileMap().size(); i++) {
@@ -71,13 +65,5 @@ public class Router {
         }
 
         return Constant.Status.OK;
-    }
-
-    private FileInputStream getPropertiesFile() {
-        try {
-            return new FileInputStream(getClass().getClassLoader().getResource(Constant.Configuration.SYSTEM_PROPERTIES_FILE_NAME).getFile());
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
