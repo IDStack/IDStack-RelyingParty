@@ -97,12 +97,12 @@ public class APIHandler {
      * @return status of saving
      * @throws IOException if file cannot be converted into bytes
      */
-    @RequestMapping(value = "/{version}/store", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public String storeDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
+    public String evaluateDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
         if (!feature.validateRequest(version))
             return Constant.Status.STATUS_ERROR_VERSION;
-        return router.storeDocuments(feature, storeFilePath, request, json, email);
+        return router.evaluateDocuments(feature, storeFilePath, request, json, email);
     }
 
     /**

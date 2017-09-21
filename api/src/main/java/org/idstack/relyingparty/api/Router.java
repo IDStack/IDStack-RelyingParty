@@ -43,7 +43,7 @@ public class Router {
         return new Gson().toJson(scores);
     }
 
-    protected String storeDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email) throws IOException {
+    protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email) throws IOException {
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
 
         if (object.size() != request.getFileMap().size()) {
@@ -58,10 +58,6 @@ public class Router {
             feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid);
             MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
             feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid);
-        }
-
-        for (int i = 1; i <= request.getFileMap().size(); i++) {
-
         }
 
         return Constant.Status.OK;
