@@ -1,5 +1,6 @@
 package org.idstack.relyingparty.api;
 
+import com.google.gson.Gson;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -56,13 +58,13 @@ public class APIHandler {
      * @param json    json of configuration
      * @return status of saving
      */
-    @RequestMapping(value = "/{version}/{apikey}/saveconfig/basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/saveconfig/basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String saveConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
         if (!feature.validateRequest(version))
-            return Constant.Status.STATUS_ERROR_VERSION;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
-            return Constant.Status.STATUS_ERROR_API_KEY;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         return feature.saveBasicConfiguration(configFilePath, json);
     }
 
@@ -79,9 +81,9 @@ public class APIHandler {
     @ResponseBody
     public String getConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @PathVariable("type") String type, @PathVariable("property") Optional<String> property) {
         if (!feature.validateRequest(version))
-            return Constant.Status.STATUS_ERROR_VERSION;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
-            return Constant.Status.STATUS_ERROR_API_KEY;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         return feature.getConfigurationAsJson(configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME, property);
     }
 
@@ -97,11 +99,11 @@ public class APIHandler {
      * @return status of saving
      * @throws IOException if file cannot be converted into bytes
      */
-    @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String evaluateDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
         if (!feature.validateRequest(version))
-            return Constant.Status.STATUS_ERROR_VERSION;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         return router.evaluateDocuments(feature, storeFilePath, request, json, email);
     }
 
@@ -113,13 +115,13 @@ public class APIHandler {
      * @param json    signed json
      * @return confidence score
      */
-    @RequestMapping(value = "/{version}/{apikey}/confidence", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/confidence", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getConfidenceScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
         if (!feature.validateRequest(version))
-            return Constant.Status.STATUS_ERROR_VERSION;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
-            return Constant.Status.STATUS_ERROR_API_KEY;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         return router.getConfidenceScore(json);
     }
 
@@ -131,13 +133,13 @@ public class APIHandler {
      * @param json    signed set of jsons
      * @return correlation score
      */
-    @RequestMapping(value = "/{version}/{apikey}/correlation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/correlation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getCorrelationScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
         if (!feature.validateRequest(version))
-            return Constant.Status.STATUS_ERROR_VERSION;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
-            return Constant.Status.STATUS_ERROR_API_KEY;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         return router.getCorrelationScore(json);
     }
 
@@ -148,13 +150,13 @@ public class APIHandler {
      * @param apikey  api key
      * @return document list
      */
-    @RequestMapping(value = "/{version}/{apikey}/getdocstore", method = RequestMethod.GET)
+    @RequestMapping(value = "/{version}/{apikey}/getdocstore", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getStoredDocuments(@PathVariable("version") String version, @PathVariable("apikey") String apikey) {
         if (!feature.validateRequest(version))
-            return Constant.Status.STATUS_ERROR_VERSION;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
-            return Constant.Status.STATUS_ERROR_API_KEY;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         return feature.getDocumentStore(storeFilePath);
     }
 }

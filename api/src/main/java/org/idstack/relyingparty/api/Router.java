@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
@@ -28,9 +28,7 @@ import java.util.UUID;
 public class Router {
 
     protected String getConfidenceScore(String json) {
-        HashMap<String, Double> score = new HashMap<>();
-        score.put("score", new ConfidenceScore().getSingleDocumentScore(json));
-        return new Gson().toJson(score);
+        return new Gson().toJson(Collections.singletonMap("score", new ConfidenceScore().getSingleDocumentScore(json)));
     }
 
     protected String getCorrelationScore(String json) {
@@ -47,7 +45,7 @@ public class Router {
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
 
         if (object.size() != request.getFileMap().size()) {
-            return Constant.Status.STATUS_ERROR_PARAMETER;
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
         }
 
         for (int i = 1; i <= object.size(); i++) {
@@ -60,6 +58,6 @@ public class Router {
             feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid);
         }
 
-        return Constant.Status.OK;
+        return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.SUCCESS));
     }
 }
