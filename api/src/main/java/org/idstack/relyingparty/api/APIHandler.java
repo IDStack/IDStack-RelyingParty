@@ -3,14 +3,14 @@ package org.idstack.relyingparty.api;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -29,17 +29,18 @@ public class APIHandler {
     @Autowired
     private FeatureImpl feature;
 
+    @Value(value = "classpath:" + Constant.Configuration.SYSTEM_PROPERTIES_FILE_NAME)
+    private Resource resource;
+
     private String apiKey;
     private String configFilePath;
     private String storeFilePath;
-    private FileInputStream inputStream;
 
     @PostConstruct
-    void init() throws FileNotFoundException {
-        inputStream = new FileInputStream(getClass().getClassLoader().getResource(Constant.Configuration.SYSTEM_PROPERTIES_FILE_NAME).getFile());
-        apiKey = feature.getProperty(inputStream, Constant.Configuration.API_KEY);
-        configFilePath = feature.getProperty(inputStream, Constant.Configuration.CONFIG_FILE_PATH);
-        storeFilePath = feature.getProperty(inputStream, Constant.Configuration.STORE_FILE_PATH);
+    void init() throws IOException {
+        apiKey = feature.getProperty(resource.getInputStream(), Constant.Configuration.API_KEY);
+        configFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.CONFIG_FILE_PATH);
+        storeFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.STORE_FILE_PATH);
     }
 
     @RequestMapping(value = {"/", "/{version}", "/{version}/{apikey}"})
