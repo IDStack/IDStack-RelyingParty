@@ -90,10 +90,8 @@ public class CorrelationScore {
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
             String name = getConcatenatedValue(doc, Constant.Attribute.NAME);
-            if (name.isEmpty()) {
-                scores[i] = -100;
-            } else {
-                scores[i] = 0;
+            scores[i] = 0;
+            if (!name.isEmpty()) {
                 names.add(name);
             }
         }
@@ -121,8 +119,7 @@ public class CorrelationScore {
             Document doc = docs[i];
             String name = getConcatenatedValue(doc, Constant.Attribute.NAME);
             names[i] = name;
-            //if name is not present set -100
-            scores[i] = name.isEmpty() ? -100 : 0;
+            scores[i] = 0;
         }
 
         NormalizedLevenshtein similarity = new NormalizedLevenshtein(); // TODO use weighted lavenshtein
@@ -153,8 +150,7 @@ public class CorrelationScore {
             Document doc = docs[i];
             String name = getConcatenatedValue(doc, Constant.Attribute.ADDRESS);
             names[i] = name;
-            //if name is not present set -100
-            scores[i] = name.isEmpty() ? -100 : 0;
+            scores[i] = 0;
         }
 
         NormalizedLevenshtein similarity = new NormalizedLevenshtein(); // TODO use weighted lavenshtein
@@ -186,8 +182,7 @@ public class CorrelationScore {
             Document doc = docs[i];
             String name = getConcatenatedValue(doc, Constant.Attribute.DOB);
             names[i] = name;
-            //if name is not present set -100
-            scores[i] = name.isEmpty() ? -100 : 0;
+            scores[i] = 0;
         }
 
         NormalizedLevenshtein similarity = new NormalizedLevenshtein(); // TODO use weighted lavenshtein
@@ -228,8 +223,7 @@ public class CorrelationScore {
             }
 
             nics[i] = nic;
-            //if nic is not present set -100
-            scores[i] = nic.isEmpty() ? -100 : 0;
+            scores[i] = 0;
         }
 
         //select most popular nic
@@ -284,8 +278,7 @@ public class CorrelationScore {
             }
 
             genders[i] = gender;
-            //if gender is not present set -100
-            scores[i] = gender.isEmpty() ? -100 : 0;
+            scores[i] = 0;
         }
 
         if (!candidates.isEmpty()) {
