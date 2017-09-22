@@ -4,6 +4,7 @@ import org.idstack.feature.Parser;
 import org.idstack.feature.document.Document;
 import org.idstack.feature.document.Validator;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
@@ -49,7 +50,11 @@ public class ConfidenceScore {
 
         //algo
         //TODO set different weights for content and signatures
-        double score = (double) ((2 * signatureSigns / (allSigns - 1)) + contentSigns) / (2 * allSigns);
+        double score = (double) ((2 * signatureSigns / (allSigns - 1)) + contentSigns) * 100 / (2 * allSigns);
+
+        //round off to 2 decimal places
+        DecimalFormat df = new DecimalFormat("#.##");
+        score = Double.valueOf(df.format(score));
 
         return score;
     }

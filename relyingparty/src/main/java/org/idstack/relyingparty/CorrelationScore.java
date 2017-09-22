@@ -8,6 +8,7 @@ import org.idstack.feature.Constant;
 import org.idstack.feature.Parser;
 import org.idstack.feature.document.Document;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -165,7 +166,11 @@ public class CorrelationScore {
                         myScore += (1 - similarity.distance(name, names[j]));
                     }
                 }
-                scores[i] = myScore / neighborCount;
+                double score = myScore * 100 / neighborCount;
+                //round off to 2 decimal places
+                DecimalFormat df = new DecimalFormat("#.##");
+                score = Double.valueOf(df.format(score));
+                scores[i] = score;
             }
         }
         return scores;
@@ -197,7 +202,7 @@ public class CorrelationScore {
                         myScore += (1 - similarity.distance(name, names[j]));
                     }
                 }
-                scores[i] = myScore / neighborCount;
+                scores[i] = myScore * 100 / neighborCount;
             }
         }
         return scores;
@@ -238,7 +243,7 @@ public class CorrelationScore {
 
             //set scores
             for (int i = 0; i < docs.length; i++) {
-                scores[i] = (nics[i].equals(popular) && scores[i] == 0) ? 1 : 0;
+                scores[i] = (nics[i].equals(popular) && scores[i] == 0) ? 100 : 0;
             }
         }
         return scores;
@@ -293,7 +298,7 @@ public class CorrelationScore {
 
             //set scores
             for (int i = 0; i < docs.length; i++) {
-                scores[i] = (genders[i].equals(popular) && scores[i] == 0) ? 1 : 0;
+                scores[i] = (genders[i].equals(popular) && scores[i] == 0) ? 100 : 0;
             }
         }
 

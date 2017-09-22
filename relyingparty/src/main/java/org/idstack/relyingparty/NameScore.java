@@ -10,6 +10,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -130,16 +131,21 @@ public class NameScore {
 
                 //TODO find the weight for order and string similarity
 
-                double score = (orderScore + stringScore) / 2;
+                double score = (orderScore + stringScore) * 100 / 2;
 
-                pairScores[i][j] = score * 100;
-                pairScores[j][i] = score * 100;
+                pairScores[i][j] = score;
+                pairScores[j][i] = score;
             }
         }
         ArrayList<Double> docScores = new ArrayList<>(nameCount);
         for (int i = 0; i < nameCount; i++) {
             double rowSum = DoubleStream.of(pairScores[i]).sum();
-            docScores.add(rowSum / (nameCount - 1)); //-1 for (i,i)
+
+            //round off to 2 decimal places
+            double score = rowSum / (nameCount - 1);
+            DecimalFormat df = new DecimalFormat("#.##");
+            score = Double.valueOf(df.format(score));
+            docScores.add(score); //-1 for (i,i)
         }
 
         return docScores;
