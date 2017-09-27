@@ -63,21 +63,29 @@ public class CorrelationScore {
     }
 
     private String getConcatenatedValue(Document doc, Pair<Double, String[]> attribute) {
-        String name = "";
+        String name;
         StringJoiner sb = new StringJoiner(" ");
         LinkedHashMap<String, Object> content = doc.getContent();
+        Map<String, String> flatAttributeMap = new HashMap<>();
         for (String attributeName : attribute.getRight()) {
             if (content.get(attributeName) != null) {
                 Object value = content.get(attributeName);
                 if (value instanceof JsonPrimitive) {
-                    sb.add(((JsonPrimitive) value).getAsString());
+                    flatAttributeMap.put(attributeName, ((JsonPrimitive) value).getAsString());
                 } else {
                     //assume only one nested level
                     LinkedHashMap<String, Object> names = (LinkedHashMap<String, Object>) value;
                     for (String key : names.keySet()) {
-                        sb.add(((JsonPrimitive) names.get(key)).getAsString());
+                        flatAttributeMap.put(attributeName, (((JsonPrimitive) names.get(key)).getAsString()));
                     }
                 }
+            }
+        }
+        for (String attributeName : attribute.getRight()) {
+            String nameSeg = flatAttributeMap.get(attributeName);
+            if (nameSeg != null) {
+                sb.add(nameSeg);
+                System.out.println(nameSeg);
             }
         }
 
