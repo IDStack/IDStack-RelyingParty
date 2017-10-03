@@ -1,4 +1,4 @@
-package org.idstack.relyingparty.api;
+package org.idstack.relyingparty.api.configuration;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

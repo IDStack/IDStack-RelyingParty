@@ -2,7 +2,7 @@ package org.idstack.relyingparty.api.security;
 
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
-import org.idstack.relyingparty.api.Router;
+import org.idstack.relyingparty.api.controller.Router;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

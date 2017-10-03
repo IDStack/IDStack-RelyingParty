@@ -1,4 +1,4 @@
-package org.idstack.relyingparty.api;
+package org.idstack.relyingparty.api.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

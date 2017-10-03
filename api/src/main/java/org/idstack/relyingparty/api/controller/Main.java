@@ -1,4 +1,4 @@
-package org.idstack.relyingparty.api;
+package org.idstack.relyingparty.api.controller;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
