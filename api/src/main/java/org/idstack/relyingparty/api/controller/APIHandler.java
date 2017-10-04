@@ -86,26 +86,6 @@ public class APIHandler {
         return feature.getConfigurationAsJson(configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME, property);
     }
 
-    //Access by the owner
-
-    /**
-     * Store the signed jsons + signed pdfs received for evaluate
-     *
-     * @param version api version
-     * @param json    set of signed jsons
-     * @param email   email of the sender
-     * @param request request object for access the signed pdf files
-     * @return status of saving
-     * @throws IOException if file cannot be converted into bytes
-     */
-    @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public String evaluateDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
-        if (!feature.validateRequest(version))
-            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        return router.evaluateDocuments(feature, storeFilePath, request, json, email);
-    }
-
     /**
      * Evaluate the confidence score of single json document
      *
@@ -157,5 +137,25 @@ public class APIHandler {
         if (!feature.validateRequest(apiKey, apikey))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         return feature.getDocumentStore(storeFilePath);
+    }
+
+    //*************************************************** PUBLIC API ***************************************************
+
+    /**
+     * Store the signed jsons + signed pdfs received for evaluate
+     *
+     * @param version api version
+     * @param json    set of signed jsons
+     * @param email   email of the sender
+     * @param request request object for access the signed pdf files
+     * @return status of saving
+     * @throws IOException if file cannot be converted into bytes
+     */
+    @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String evaluateDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
+        if (!feature.validateRequest(version))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
+        return router.evaluateDocuments(feature, storeFilePath, request, json, email);
     }
 }
