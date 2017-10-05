@@ -1,12 +1,16 @@
 package org.idstack.relyingparty;
 
 
+import com.google.gson.Gson;
 import com.google.gson.JsonPrimitive;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import org.apache.commons.lang3.tuple.Pair;
 import org.idstack.feature.Constant;
 import org.idstack.feature.Parser;
 import org.idstack.feature.document.Document;
+import org.idstack.relyingparty.response.AttributeScore;
+import org.idstack.relyingparty.response.CorrelationScoreResponse;
+import org.idstack.relyingparty.response.SuperAttribute;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -25,21 +29,22 @@ public class CorrelationScore {
      * @param documentJSONs
      * @return a map of String keys and double[] values (array of name scores of documents)
      */
-    public LinkedHashMap<String, double[]> getMultipleDocumentScore(ArrayList<String> documentJSONs) {
+    public CorrelationScoreResponse getMultipleDocumentScore(ArrayList<String> documentJSONs) {
         int docsLength = documentJSONs.size();
         Document[] docs = new Document[docsLength];
         for (int i = 0; i < docsLength; i++) {
             Document doc = Parser.parseDocumentJson(documentJSONs.get(i));
             docs[i] = doc;
         }
-        LinkedHashMap<String, double[]> attributeScores = new LinkedHashMap<>();
-        attributeScores.put(Constant.Attribute.NAME.getLeft(), getNameCorrelationScore(docs));
-        attributeScores.put(Constant.Attribute.ADDRESS.getLeft(), getAddressCorrelationScore(docs));
-        attributeScores.put(Constant.Attribute.DOB.getLeft(), getDOBCorrelationScore(docs));
-        attributeScores.put(Constant.Attribute.NIC.getLeft(), getNICCorrelationScore(docs));
-        attributeScores.put(Constant.Attribute.SEX.getLeft(), getGenderCorrelationScore(docs));
+        SuperAttribute name = new SuperAttribute(getNameCorrelationScore(docs));
+        SuperAttribute address = new SuperAttribute(getAddressCorrelationScore(docs));
+        SuperAttribute dob = new SuperAttribute(getDOBCorrelationScore(docs));
+        SuperAttribute gender = new SuperAttribute(getGenderCorrelationScore(docs));
+        SuperAttribute nic = new SuperAttribute(getNICCorrelationScore(docs));
 
-        return attributeScores;
+        CorrelationScoreResponse cs = new CorrelationScoreResponse(name, address, dob, gender, nic);
+
+        return cs;
     }
 
     private String getConcatenatedValue(Document doc, Pair<String, String[]> attribute) {
@@ -56,7 +61,7 @@ public class CorrelationScore {
                     //assume only one nested level
                     LinkedHashMap<String, Object> names = (LinkedHashMap<String, Object>) value;
                     for (String key : names.keySet()) {
-                        flatAttributeMap.put(attributeName, (((JsonPrimitive) names.get(key)).getAsString()));
+                        flatAttributeMap.put(key, (((JsonPrimitive) names.get(key)).getAsString()));
                     }
                 }
             }
@@ -65,7 +70,6 @@ public class CorrelationScore {
             String nameSeg = flatAttributeMap.get(attributeName);
             if (nameSeg != null) {
                 sb.add(nameSeg);
-                System.out.println(nameSeg);
             }
         }
 
@@ -73,102 +77,89 @@ public class CorrelationScore {
         return name;
     }
 
-    private double[] getNameCorrelationScore(Document[] docs) {
-        double[] scores = new double[docs.length];
+    private ArrayList<AttributeScore> getNameCorrelationScore(Document[] docs) {
+
         ArrayList<String> names = new ArrayList<>();
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
             String name = getConcatenatedValue(doc, Constant.Attribute.NAME);
-            scores[i] = 0;
             if (!name.isEmpty()) {
                 names.add(name);
             }
         }
 
         NameScore ns = new NameScore(names);
-        ArrayList<Double> nameScores = ns.getNameScore();
+        ArrayList<AttributeScore> nameScores = ns.getNameScore();
 
-        int nsPointer = 0;
-        for (int i = 0; i < scores.length; i++) {
-            if (scores[i] == 0) {
-                scores[i] = nameScores.get(nsPointer);
-                nsPointer++;
-            }
-        }
-        return scores;
+        return nameScores;
     }
 
 
-    private double[] getAddressCorrelationScore(Document[] docs) {
-        int docsLength = docs.length;
-        double[] scores = new double[docsLength];
-        String[] names = new String[docsLength];
-        //count candidates with occurrences count
-        Map<String, Integer> candidates = new HashMap<>();
+    private ArrayList<AttributeScore> getAddressCorrelationScore(Document[] docs) {
+        ArrayList<String> names = new ArrayList<>();
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
             String name = getConcatenatedValue(doc, Constant.Attribute.ADDRESS);
-            names[i] = name;
-            scores[i] = 0;
-        }
-
-        NormalizedLevenshtein similarity = new NormalizedLevenshtein(); // TODO use weighted lavenshtein
-        for (int i = 0; i < docsLength; i++) {
-            if (scores[i] == 0) {
-                String name = names[i];
-                int myScore = 0;
-                int neighborCount = 0;
-                for (int j = 0; j < docsLength; j++) {
-                    if (j != i) {
-                        neighborCount += 1;
-                        myScore += (1 - similarity.distance(name, names[j]));
-                    }
-                }
-                double score = myScore * 100 / neighborCount;
-                //round off to 2 decimal places
-                DecimalFormat df = new DecimalFormat("#.##");
-                score = Double.valueOf(df.format(score));
-                scores[i] = score;
+            if (!name.isEmpty()) {
+                names.add(name);
+            } else {
+                names.add("");
             }
         }
-        return scores;
+
+        NameScore ns = new NameScore(names);
+        ArrayList<AttributeScore> nameScores = ns.getNameScore();
+
+        return nameScores;
     }
 
     //TODO find date comparison
-    private double[] getDOBCorrelationScore(Document[] docs) {
+    private ArrayList<AttributeScore> getDOBCorrelationScore(Document[] docs) {
         int docsLength = docs.length;
-        double[] scores = new double[docsLength];
-        String[] names = new String[docsLength];
+        ArrayList<AttributeScore> attrScore = new ArrayList<>();
+        String[] nics = new String[docsLength];
         //count candidates with occurrences count
         Map<String, Integer> candidates = new HashMap<>();
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
-            String name = getConcatenatedValue(doc, Constant.Attribute.DOB);
-            names[i] = name;
-            scores[i] = 0;
+            String nic = "";
+            //iterate over "dob" attributes
+            for (String attributeName : Constant.Attribute.DOB.getRight()) {
+                if (doc.getContent().get(attributeName) != null) {
+                    nic = ((JsonPrimitive) doc.getContent().get(attributeName)).getAsString().toLowerCase();
+                    Integer count = candidates.get(nic);
+                    candidates.put(nic, count != null ? count + 1 : 1);
+                    break;
+                }
+            }
+            if (nic.isEmpty()) {
+                nic = "";
+                Integer count = candidates.get(nic);
+                candidates.put("", count != null ? count + 1 : 1);
+            }
+
+            nics[i] = nic;
         }
 
-        NormalizedLevenshtein similarity = new NormalizedLevenshtein(); // TODO use weighted lavenshtein
-        for (int i = 0; i < docsLength; i++) {
-            if (scores[i] == 0) {
-                String name = names[i];
-                int myScore = 0;
-                int neighborCount = 0;
-                for (int j = 0; j < docsLength; j++) {
-                    if (j != i) {
-                        neighborCount += 1;
-                        myScore += (1 - similarity.distance(name, names[j]));
-                    }
-                }
-                scores[i] = myScore * 100 / neighborCount;
-            }
+        //select most popular nic
+        String popular = "";
+        if (!candidates.isEmpty()) {
+            popular = getPopularString(candidates);
+
         }
-        return scores;
+        //set scores
+        for (int i = 0; i < docs.length; i++) {
+            double score = (!popular.isEmpty() && nics[i].equals(popular)) ? 100 : 0;
+            AttributeScore as = new AttributeScore(nics[i], score);
+
+            attrScore.add(as);
+        }
+        return attrScore;
     }
 
-    private double[] getNICCorrelationScore(Document[] docs) {
+    private ArrayList<AttributeScore> getNICCorrelationScore(Document[] docs) {
         int docsLength = docs.length;
-        double[] scores = new double[docsLength];
+        ArrayList<AttributeScore> attrScore = new ArrayList<>();
         String[] nics = new String[docsLength];
         //count candidates with occurrences count
         Map<String, Integer> candidates = new HashMap<>();
@@ -180,38 +171,42 @@ public class CorrelationScore {
                 if (doc.getContent().get(attributeName) != null) {
                     nic = ((JsonPrimitive) doc.getContent().get(attributeName)).getAsString().toLowerCase();
                     Integer count = candidates.get(nic);
-                    candidates.put(nic, count != null ? count + 1 : 0);
+                    candidates.put(nic, count != null ? count + 1 : 1);
+
                     break;
                 }
             }
+            if (nic.isEmpty()) {
+                nic = "";
+                Integer count = candidates.get(nic);
+                candidates.put("", count != null ? count + 1 : 1);
+            }
 
             nics[i] = nic;
-            scores[i] = 0;
         }
 
         //select most popular nic
+        String popular = "";
         if (!candidates.isEmpty()) {
-            String popular = Collections.max(candidates.entrySet(),
-                    new Comparator<Map.Entry<String, Integer>>() {
-                        @Override
-                        public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                            return o1.getValue().compareTo(o2.getValue());
-                        }
-                    }).getKey();
+            popular = getPopularString(candidates);
 
-            //set scores
-            for (int i = 0; i < docs.length; i++) {
-                scores[i] = (nics[i].equals(popular) && scores[i] == 0) ? 100 : 0;
-            }
         }
-        return scores;
+        //set scores
+        for (int i = 0; i < docs.length; i++) {
+            double score = (!popular.isEmpty() && nics[i].equals(popular)) ? 100 : 0;
+            AttributeScore as = new AttributeScore(nics[i], score);
+            attrScore.add(as);
+        }
+
+        return attrScore;
     }
 
-    private double[] getGenderCorrelationScore(Document[] docs) {
+    private ArrayList<AttributeScore> getGenderCorrelationScore(Document[] docs) {
 
         int docsLength = docs.length;
-        double[] scores = new double[docsLength];
         int[] genders = new int[docsLength];
+        String[] genderNames = new String[docsLength];
+        ArrayList<AttributeScore> attrScore = new ArrayList<>();
         //count candidates with occurrences count
         Map<Integer, Integer> candidates = new HashMap<>();
         for (int i = 0; i < docs.length; i++) {
@@ -221,6 +216,7 @@ public class CorrelationScore {
             for (String attributeName : Constant.Attribute.SEX.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
                     gender = ((JsonPrimitive) doc.getContent().get(attributeName)).getAsString().toLowerCase();
+
                     //determine the target class of the value
                     int targetClass = 0;
                     for (int j = 0; j < Constant.Attribute.Gender.TARGET_CLASSES.length; j++) {
@@ -235,35 +231,66 @@ public class CorrelationScore {
                     }
 
                     Integer count = candidates.get(targetClass);
-                    candidates.put(targetClass, count != null ? count + 1 : 0);
+                    candidates.put(targetClass + 1, count != null ? count + 1 : 1);
                     break;
                 } else {
                     //there is no gender value for doc[i]
                     genders[i] = -1;
+                    Integer count = candidates.get(0);
+                    candidates.put(0, count != null ? count + 1 : 1);
                 }
             }
-
-//            genders[i] = gender;
-            scores[i] = 0;
+            genderNames[i] = gender;
         }
 
         if (!candidates.isEmpty()) {
             //select most popular gender
-            int popular = Collections.max(candidates.entrySet(),
-                    new Comparator<Map.Entry<Integer, Integer>>() {
-                        @Override
-                        public int compare(Map.Entry<Integer, Integer> o1, Map.Entry<Integer, Integer> o2) {
-                            return o1.getValue().compareTo(o2.getValue());
-                        }
-                    }).getKey();
+            int popular = getPopularInt(candidates);
 
             //set scores
             for (int i = 0; i < docs.length; i++) {
-                scores[i] = (genders[i] == popular && scores[i] == 0) ? 100 : 0;
+                double score = (popular != 0 && genders[i] == popular) ? 100 : 0;
+                AttributeScore as = new AttributeScore(genderNames[i], score);
+                attrScore.add(as);
             }
         }
 
-        return scores;
+        return attrScore;
+    }
+
+    private String getPopularString(Map<String, Integer> candidates) {
+        if (candidates.get("") != null) {
+            if (candidates.get("") >= candidates.size() / 2) {
+                return "";
+            }
+        }
+
+        String popular = Collections.max(candidates.entrySet(),
+                new Comparator<Map.Entry<String, Integer>>() {
+                    @Override
+                    public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                        return o1.getValue().compareTo(o2.getValue());
+                    }
+                }).getKey();
+
+        return popular;
+    }
+
+    private int getPopularInt(Map<Integer, Integer> candidates) {
+        if (candidates.get(0) != null) {
+            if (candidates.get(0) >= candidates.size() / 2) {
+                //if half or more entries are empty, the popular is the empty
+                return 0;
+            }
+        }
+        int popular = Collections.max(candidates.entrySet(),
+                new Comparator<Map.Entry<Integer, Integer>>() {
+                    @Override
+                    public int compare(Map.Entry<Integer, Integer> o1, Map.Entry<Integer, Integer> o2) {
+                        return o1.getValue().compareTo(o2.getValue());
+                    }
+                }).getKey();
+        return popular;
     }
 
 }

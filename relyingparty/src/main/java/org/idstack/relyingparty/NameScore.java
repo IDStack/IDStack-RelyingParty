@@ -9,6 +9,7 @@ package org.idstack.relyingparty;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
+import org.idstack.relyingparty.response.AttributeScore;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -62,6 +63,9 @@ public class NameScore {
     private double getTwoNameOrderScore(int index1, int index2) {
         ArrayList<String> first = this.singularSoundex.get(index1);
         ArrayList<String> second = this.singularSoundex.get(index2);
+        if (first.size() == 0 || second.size() == 0) {
+            return 0;
+        }
         if (this.singularSoundex.get(index1).size() > this.singularSoundex.get(index2).size()) {
             first = this.singularSoundex.get(index2);
             second = this.singularSoundex.get(index1);
@@ -109,14 +113,14 @@ public class NameScore {
             }
         }
         //average the similarities of each soundex
-        stringScore = stringScore / this.soundexesAll.size();
+        stringScore = this.soundexesAll.size() == 0 ? 0 : stringScore / this.soundexesAll.size();
         return stringScore;
     }
 
     /**
      * @return the score of each document
      */
-    public ArrayList<Double> getNameScore() {
+    public ArrayList<AttributeScore> getNameScore() {
         //TODO detect and remove/process initials
 
         int nameCount = this.names.size();
@@ -137,7 +141,7 @@ public class NameScore {
                 pairScores[j][i] = score;
             }
         }
-        ArrayList<Double> docScores = new ArrayList<>(nameCount);
+        ArrayList<AttributeScore> docScores = new ArrayList<>(nameCount);
         for (int i = 0; i < nameCount; i++) {
             double rowSum = DoubleStream.of(pairScores[i]).sum();
 
@@ -145,7 +149,8 @@ public class NameScore {
             double score = rowSum / (nameCount - 1);
             DecimalFormat df = new DecimalFormat("#.##");
             score = Double.valueOf(df.format(score));
-            docScores.add(score); //-1 for (i,i)
+            AttributeScore as = new AttributeScore(this.names.get(i), score);
+            docScores.add(as);
         }
 
         return docScores;
