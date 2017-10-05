@@ -3,8 +3,6 @@ package org.idstack.relyingparty.api.controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.document.MetaData;
@@ -18,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -55,6 +52,7 @@ public class Router {
 
     protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email) throws IOException {
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
+        String uuid = UUID.randomUUID().toString();
 
         if (object.size() != request.getFileMap().size()) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
@@ -63,24 +61,23 @@ public class Router {
         for (int i = 1; i <= object.size(); i++) {
             JsonObject doc = object.getAsJsonObject(String.valueOf(i));
 
-            try {
-                boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(json);
-                if (!isValidExtractor)
-                    return "Extractor's signature is not valid";
-
-                ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(json);
-                if (isValidValidators.contains(false))
-                    return "One or more validator signatures are not valid";
-            } catch (CertificateException | OperatorCreationException | CMSException e) {
-                throw new RuntimeException(e);
-            }
+            //TODO: verification logic
+//            try {
+//                boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(doc.toString());
+//                if (!isValidExtractor)
+//                    return "Extractor's signature is not valid";
+//                ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(doc.toString());
+//                if (isValidValidators.contains(false))
+//                    return "One or more validator signatures are not valid";
+//            } catch (CertificateException | OperatorCreationException | CMSException e) {
+//                throw new RuntimeException(e);
+//            }
 
             JsonObject metadataObject = doc.getAsJsonObject(Constant.JsonAttribute.META_DATA);
             MetaData metaData = new Gson().fromJson(metadataObject.toString(), MetaData.class);
-            String uuid = UUID.randomUUID().toString();
-            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid);
             MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
-            feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid);
+            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid , i);
+            feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid, i);
         }
 
         return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.SUCCESS));
