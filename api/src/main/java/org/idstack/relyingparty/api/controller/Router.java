@@ -6,9 +6,12 @@ import com.google.gson.JsonParser;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.document.MetaData;
+import org.idstack.feature.verification.ExtractorVerifier;
+import org.idstack.feature.verification.SignatureVerifier;
 import org.idstack.relyingparty.ConfidenceScore;
 import org.idstack.relyingparty.CorrelationScore;
 import org.idstack.relyingparty.response.CorrelationScoreResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -16,7 +19,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.UUID;
 
 /**
@@ -74,7 +76,7 @@ public class Router {
             JsonObject metadataObject = doc.getAsJsonObject(Constant.JsonAttribute.META_DATA);
             MetaData metaData = new Gson().fromJson(metadataObject.toString(), MetaData.class);
             MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
-            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid , i);
+            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
             feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid, i);
         }
 

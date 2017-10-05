@@ -1,9 +1,7 @@
 package org.idstack.relyingparty;
 
 
-import com.google.gson.Gson;
 import com.google.gson.JsonPrimitive;
-import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import org.apache.commons.lang3.tuple.Pair;
 import org.idstack.feature.Constant;
 import org.idstack.feature.Parser;
@@ -12,7 +10,6 @@ import org.idstack.relyingparty.response.AttributeScore;
 import org.idstack.relyingparty.response.CorrelationScoreResponse;
 import org.idstack.relyingparty.response.SuperAttribute;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
