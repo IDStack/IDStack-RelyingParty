@@ -20,30 +20,10 @@ import java.util.*;
 @SuppressWarnings("Duplicates")
 public class CorrelationScore {
 
-    /**
-     * Calculates a score for a single document based on the document's signed attributes by signers.
-     *
-     * @param documentJSON, a String representation of a valid JSON object
-     * @return calculated score
-     */
-    public double getSingleDocumentScore(String documentJSON) {
-
-        Document doc = Parser.parseDocumentJson(documentJSON);
-
-        int signedAttributesCount = 0;
-        int allAttributesCount = 0;
-
-        for (String k : doc.getContent().keySet()) {
-            allAttributesCount += 1;
-        }
-
-        return (double) signedAttributesCount * 100 / allAttributesCount;
-    }
 
     /**
      * @param documentJSONs
      * @return a map of String keys and double[] values (array of name scores of documents)
-     * keys = "name", "address", "dob", "nic", "gender"
      */
     public LinkedHashMap<String, double[]> getMultipleDocumentScore(ArrayList<String> documentJSONs) {
         int docsLength = documentJSONs.size();
@@ -53,16 +33,16 @@ public class CorrelationScore {
             docs[i] = doc;
         }
         LinkedHashMap<String, double[]> attributeScores = new LinkedHashMap<>();
-        attributeScores.put("name", getNameCorrelationScore(docs));
-        attributeScores.put("address", getAddressCorrelationScore(docs));
-        attributeScores.put("dob", getDOBCorrelationScore(docs));
-        attributeScores.put("nic", getNICCorrelationScore(docs));
-        attributeScores.put("gender", getGenderCorrelationScore(docs));
+        attributeScores.put(Constant.Attribute.NAME.getLeft(), getNameCorrelationScore(docs));
+        attributeScores.put(Constant.Attribute.ADDRESS.getLeft(), getAddressCorrelationScore(docs));
+        attributeScores.put(Constant.Attribute.DOB.getLeft(), getDOBCorrelationScore(docs));
+        attributeScores.put(Constant.Attribute.NIC.getLeft(), getNICCorrelationScore(docs));
+        attributeScores.put(Constant.Attribute.SEX.getLeft(), getGenderCorrelationScore(docs));
 
         return attributeScores;
     }
 
-    private String getConcatenatedValue(Document doc, Pair<Double, String[]> attribute) {
+    private String getConcatenatedValue(Document doc, Pair<String, String[]> attribute) {
         String name;
         StringJoiner sb = new StringJoiner(" ");
         LinkedHashMap<String, Object> content = doc.getContent();
@@ -118,36 +98,6 @@ public class CorrelationScore {
         return scores;
     }
 
-    private double[] getNameCorrelationScore_old(Document[] docs) {
-        int docsLength = docs.length;
-        double[] scores = new double[docsLength];
-        String[] names = new String[docsLength];
-        //count candidates with occurrences count
-        Map<String, Integer> candidates = new HashMap<>();
-        for (int i = 0; i < docs.length; i++) {
-            Document doc = docs[i];
-            String name = getConcatenatedValue(doc, Constant.Attribute.NAME);
-            names[i] = name;
-            scores[i] = 0;
-        }
-
-        NormalizedLevenshtein similarity = new NormalizedLevenshtein(); // TODO use weighted lavenshtein
-        for (int i = 0; i < docsLength; i++) {
-            if (scores[i] == 0) {
-                String name = names[i];
-                int myScore = 0;
-                int neighborCount = 0;
-                for (int j = 0; j < docsLength; j++) {
-                    if (j != i) {
-                        neighborCount += 1;
-                        myScore += (1 - similarity.distance(name, names[j]));
-                    }
-                }
-                scores[i] = myScore / neighborCount;
-            }
-        }
-        return scores;
-    }
 
     private double[] getAddressCorrelationScore(Document[] docs) {
         int docsLength = docs.length;
@@ -258,13 +208,12 @@ public class CorrelationScore {
     }
 
     private double[] getGenderCorrelationScore(Document[] docs) {
-        String[] male = {"male", "m"};
-        String[] female = {"female", "f"};
+
         int docsLength = docs.length;
         double[] scores = new double[docsLength];
-        String[] genders = new String[docsLength];
+        int[] genders = new int[docsLength];
         //count candidates with occurrences count
-        Map<String, Integer> candidates = new HashMap<>();
+        Map<Integer, Integer> candidates = new HashMap<>();
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
             String gender = "";
@@ -272,41 +221,45 @@ public class CorrelationScore {
             for (String attributeName : Constant.Attribute.SEX.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
                     gender = ((JsonPrimitive) doc.getContent().get(attributeName)).getAsString().toLowerCase();
-                    for (String s : male) {
-                        if (gender.equals(s)) {
-                            gender = "male";
-                            break;
+                    //determine the target class of the value
+                    int targetClass = 0;
+                    for (int j = 0; j < Constant.Attribute.Gender.TARGET_CLASSES.length; j++) {
+                        String[] targetClassValues = Constant.Attribute.Gender.TARGET_CLASSES[j];
+                        for (String s : targetClassValues) {
+                            if (gender.equals(s)) {
+                                genders[i] = j;
+                                targetClass = j;
+                                break;
+                            }
                         }
                     }
-                    for (String s : female) {
-                        if (gender.equals(s)) {
-                            gender = "female";
-                            break;
-                        }
-                    }
-                    Integer count = candidates.get(gender);
-                    candidates.put(gender, count != null ? count + 1 : 0);
+
+                    Integer count = candidates.get(targetClass);
+                    candidates.put(targetClass, count != null ? count + 1 : 0);
                     break;
+                } else {
+                    //there is no gender value for doc[i]
+                    genders[i] = -1;
                 }
             }
 
-            genders[i] = gender;
+//            genders[i] = gender;
             scores[i] = 0;
         }
 
         if (!candidates.isEmpty()) {
             //select most popular gender
-            String popular = Collections.max(candidates.entrySet(),
-                    new Comparator<Map.Entry<String, Integer>>() {
+            int popular = Collections.max(candidates.entrySet(),
+                    new Comparator<Map.Entry<Integer, Integer>>() {
                         @Override
-                        public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                        public int compare(Map.Entry<Integer, Integer> o1, Map.Entry<Integer, Integer> o2) {
                             return o1.getValue().compareTo(o2.getValue());
                         }
                     }).getKey();
 
             //set scores
             for (int i = 0; i < docs.length; i++) {
-                scores[i] = (genders[i].equals(popular) && scores[i] == 0) ? 100 : 0;
+                scores[i] = (genders[i] == popular && scores[i] == 0) ? 100 : 0;
             }
         }
 
