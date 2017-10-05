@@ -6,11 +6,9 @@ import com.google.gson.JsonParser;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.document.MetaData;
-import org.idstack.feature.verification.ExtractorVerifier;
-import org.idstack.feature.verification.SignatureVerifier;
 import org.idstack.relyingparty.ConfidenceScore;
 import org.idstack.relyingparty.CorrelationScore;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.idstack.relyingparty.response.CorrelationScoreResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -46,8 +44,8 @@ public class Router {
         for (int i = 1; i <= object.size(); i++) {
             jsonList.add(object.get(String.valueOf(i)).toString());
         }
-        LinkedHashMap<String, double[]> scores = new CorrelationScore().getMultipleDocumentScore(jsonList);
-        return new Gson().toJson(scores);
+        CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
+        return new Gson().toJson(csr);
     }
 
     protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email) throws IOException {
