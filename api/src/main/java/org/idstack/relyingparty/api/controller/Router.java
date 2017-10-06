@@ -1,6 +1,7 @@
 package org.idstack.relyingparty.api.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.idstack.feature.Constant;
@@ -51,15 +52,15 @@ public class Router {
     }
 
     protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email) throws IOException {
-        JsonObject object = new JsonParser().parse(json).getAsJsonObject();
+        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get("jsonList").getAsJsonArray();
         String uuid = UUID.randomUUID().toString();
 
-        if (object.size() != request.getFileMap().size()) {
+        if (jsonList.size() != request.getFileMap().size()) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
         }
 
-        for (int i = 1; i <= object.size(); i++) {
-            JsonObject doc = object.getAsJsonObject(String.valueOf(i));
+        for (int i = 1; i <= jsonList.size(); i++) {
+            JsonObject doc = jsonList.get(i - 1).getAsJsonObject();
 
             //TODO: verification logic
 //            try {
@@ -73,8 +74,14 @@ public class Router {
 //                throw new RuntimeException(e);
 //            }
 
+            String docType = request.getParameter("doc-type-" + i);
+
             JsonObject metadataObject = doc.getAsJsonObject(Constant.JsonAttribute.META_DATA);
             MetaData metaData = new Gson().fromJson(metadataObject.toString(), MetaData.class);
+
+            if (!docType.equals(metaData.getDocumentType()))
+                return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
+
             MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
             feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
             feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid, i);
