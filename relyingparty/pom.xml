@@ -17,11 +17,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.idstack</groupId>
-            <artifactId>idstack-feature</artifactId>
-            <version>${idstack.version}</version>
-        </dependency>
-        <dependency>
             <groupId>info.debatty</groupId>
             <artifactId>java-string-similarity</artifactId>
             <version>RELEASE</version>

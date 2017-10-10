@@ -18,17 +18,18 @@
     <dependencies>
         <dependency>
             <groupId>org.idstack</groupId>
-            <artifactId>idstack-feature</artifactId>
-            <version>${idstack.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.idstack</groupId>
             <artifactId>relyingparty</artifactId>
             <version>${idstack.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
