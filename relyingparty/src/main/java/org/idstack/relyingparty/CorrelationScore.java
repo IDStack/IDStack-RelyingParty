@@ -1,6 +1,7 @@
 package org.idstack.relyingparty;
 
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.tuple.Pair;
 import org.idstack.feature.Constant;
@@ -26,11 +27,11 @@ public class CorrelationScore {
      * @param documentJSONs
      * @return a map of String keys and double[] values (array of name scores of documents)
      */
-    public CorrelationScoreResponse getMultipleDocumentScore(ArrayList<String> documentJSONs) {
+    public CorrelationScoreResponse getMultipleDocumentScore(JsonArray documentJSONs) {
         int docsLength = documentJSONs.size();
         Document[] docs = new Document[docsLength];
         for (int i = 0; i < docsLength; i++) {
-            Document doc = Parser.parseDocumentJson(documentJSONs.get(i));
+            Document doc = Parser.parseDocumentJson(documentJSONs.get(i).toString());
             docs[i] = doc;
         }
         SuperAttribute name = new SuperAttribute(getNameCorrelationScore(docs));

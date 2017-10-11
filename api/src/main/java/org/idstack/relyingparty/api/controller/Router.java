@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -42,11 +41,7 @@ public class Router {
     }
 
     protected String getCorrelationScore(String json) {
-        ArrayList<String> jsonList = new ArrayList<>();
-        JsonObject object = new JsonParser().parse(json).getAsJsonObject();
-        for (int i = 1; i <= object.size(); i++) {
-            jsonList.add(object.get(String.valueOf(i)).toString());
-        }
+        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get("jsonList").getAsJsonArray();
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
         return new Gson().toJson(csr);
     }
