@@ -18,6 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -40,7 +44,25 @@ public class Router {
         return new Gson().toJson(Collections.singletonMap("score", new ConfidenceScore().getSingleDocumentScore(json)));
     }
 
+    protected String getConfidenceScoreByUrl(String jsonUrl) {
+        String json;
+        try {
+            URI uri = new URI(jsonUrl);
+            json = new String(Files.readAllBytes(Paths.get(uri.getPath())));
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new Gson().toJson(Collections.singletonMap("score", new ConfidenceScore().getSingleDocumentScore(json)));
+    }
+
     protected String getCorrelationScore(String json) {
+        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get("jsonList").getAsJsonArray();
+        CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
+        return new Gson().toJson(csr);
+    }
+
+    protected String getCorrelationScoreByRequestId(FeatureImpl feature, String storeFilePath, String configFilePath, String requestId) {
+        String json = feature.getDocuments(storeFilePath, configFilePath, requestId);
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get("jsonList").getAsJsonArray();
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
         return new Gson().toJson(csr);

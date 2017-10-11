@@ -105,6 +105,24 @@ public class APIHandler {
     }
 
     /**
+     * Evaluate the confidence score of single json document. Json document is sent as a URL
+     *
+     * @param version api version
+     * @param apikey  api key
+     * @param jsonUrl URL of the signed json
+     * @return confidence score
+     */
+    @RequestMapping(value = "/{version}/{apikey}/confidence/url", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String getConfidenceScoreByUrl(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "jsonUrl") String jsonUrl) {
+        if (!feature.validateRequest(version))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
+        if (!feature.validateRequest(apiKey, apikey))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        return router.getConfidenceScoreByUrl(jsonUrl);
+    }
+
+    /**
      * Evaluate the correlation score of set of json documents
      *
      * @param version api version
@@ -120,6 +138,24 @@ public class APIHandler {
         if (!feature.validateRequest(apiKey, apikey))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         return router.getCorrelationScore(json);
+    }
+
+    /**
+     * Evaluate the correlation score of set of json documents. Set of json documents are sent by request id
+     *
+     * @param version   api version
+     * @param apikey    api key
+     * @param requestId request id of the json set stored
+     * @return correlation score
+     */
+    @RequestMapping(value = "/{version}/{apikey}/correlation/request", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String getCorrelationScoreByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "requestId") String requestId) {
+        if (!feature.validateRequest(version))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
+        if (!feature.validateRequest(apiKey, apikey))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        return router.getCorrelationScoreByRequestId(feature, storeFilePath, configFilePath, requestId);
     }
 
     /**
