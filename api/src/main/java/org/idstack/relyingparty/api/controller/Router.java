@@ -41,6 +41,7 @@ public class Router {
     private SignatureVerifier signatureVerifier;
 
     protected String getConfidenceScore(String json) {
+        //TODO: verification logic
         return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
     }
 
@@ -57,6 +58,7 @@ public class Router {
 
     protected String getCorrelationScore(String json) {
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
+        //TODO: verification logic
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
         return new Gson().toJson(csr);
     }
@@ -72,9 +74,8 @@ public class Router {
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         String uuid = UUID.randomUUID().toString();
 
-        if (jsonList.size() != request.getFileMap().size()) {
+        if (jsonList.size() != request.getFileMap().size())
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
-        }
 
         for (int i = 1; i <= jsonList.size(); i++) {
             JsonObject doc = jsonList.get(i - 1).getAsJsonObject();
