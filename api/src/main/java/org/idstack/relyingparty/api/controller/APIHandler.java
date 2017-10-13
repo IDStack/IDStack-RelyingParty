@@ -37,12 +37,14 @@ public class APIHandler {
     private String apiKey;
     private String configFilePath;
     private String storeFilePath;
+    private String tmpFilePath;
 
     @PostConstruct
     void init() throws IOException {
         apiKey = feature.getProperty(resource.getInputStream(), Constant.Configuration.API_KEY);
         configFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.CONFIG_FILE_PATH);
         storeFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.STORE_FILE_PATH);
+        tmpFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.TEMP_FILE_PATH);
     }
 
     @RequestMapping(value = {"/", "/{version}", "/{version}/{apikey}"})
@@ -101,7 +103,7 @@ public class APIHandler {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        return router.getConfidenceScore(json);
+        return router.getConfidenceScore(json, tmpFilePath);
     }
 
     /**
@@ -137,7 +139,7 @@ public class APIHandler {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        return router.getCorrelationScore(json);
+        return router.getCorrelationScore(json, tmpFilePath);
     }
 
     /**
@@ -209,6 +211,6 @@ public class APIHandler {
     public String evaluateDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
         if (!feature.validateRequest(version))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        return router.evaluateDocuments(feature, storeFilePath, request, json, email);
+        return router.evaluateDocuments(feature, storeFilePath, request, json, email, tmpFilePath);
     }
 }

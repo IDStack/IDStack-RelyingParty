@@ -40,7 +40,7 @@ public class Router {
     @Autowired
     private SignatureVerifier signatureVerifier;
 
-    protected String getConfidenceScore(String json) {
+    protected String getConfidenceScore(String json, String tmpFilePath) {
         //TODO: verification logic
         return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
     }
@@ -56,7 +56,7 @@ public class Router {
         return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
     }
 
-    protected String getCorrelationScore(String json) {
+    protected String getCorrelationScore(String json, String tmpFilePath) {
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         //TODO: verification logic
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
@@ -70,7 +70,7 @@ public class Router {
         return new Gson().toJson(csr);
     }
 
-    protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email) throws IOException {
+    protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email, String tmpFilePath) throws IOException {
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         String uuid = UUID.randomUUID().toString();
 
