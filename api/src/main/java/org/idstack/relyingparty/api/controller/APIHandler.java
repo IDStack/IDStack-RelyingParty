@@ -175,6 +175,23 @@ public class APIHandler {
         return feature.getDocumentStore(storeFilePath, configFilePath, true);
     }
 
+    /**
+     * Get the stored documents in the configured store path by request id
+     *
+     * @param version api version
+     * @param apikey  api key
+     * @return document list
+     */
+    @RequestMapping(value = "/{version}/{apikey}/getdocstore/request", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String getStoredDocumentsByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "requestId") String requestId) {
+        if (!feature.validateRequest(version))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
+        if (!feature.validateRequest(apiKey, apikey))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        return feature.getDocumentStore(storeFilePath, configFilePath, true, requestId);
+    }
+
     //*************************************************** PUBLIC API ***************************************************
 
     /**
