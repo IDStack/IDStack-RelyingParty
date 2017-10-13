@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class APIHandler {
     private String configFilePath;
     private String storeFilePath;
     private String tmpFilePath;
+    private String pubFilePath;
 
     @PostConstruct
     void init() throws IOException {
@@ -45,6 +47,7 @@ public class APIHandler {
         configFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.CONFIG_FILE_PATH);
         storeFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.STORE_FILE_PATH);
         tmpFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.TEMP_FILE_PATH);
+        pubFilePath = feature.getProperty(resource.getInputStream(), Constant.Configuration.PUB_FILE_PATH);
     }
 
     @RequestMapping(value = {"/", "/{version}", "/{version}/{apikey}"})
@@ -174,7 +177,7 @@ public class APIHandler {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        return feature.getDocumentStore(storeFilePath, configFilePath, true);
+        return feature.getDocumentStore(storeFilePath, configFilePath, true).replaceAll(pubFilePath, File.separator);
     }
 
     /**
@@ -191,7 +194,7 @@ public class APIHandler {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        return feature.getDocumentStore(storeFilePath, configFilePath, true, requestId);
+        return feature.getDocumentStore(storeFilePath, configFilePath, true, requestId).replaceAll(pubFilePath, File.separator);
     }
 
     //*************************************************** PUBLIC API ***************************************************
