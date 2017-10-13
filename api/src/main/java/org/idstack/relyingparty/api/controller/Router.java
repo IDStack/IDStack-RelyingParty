@@ -41,7 +41,7 @@ public class Router {
     private SignatureVerifier signatureVerifier;
 
     protected String getConfidenceScore(String json) {
-        return new Gson().toJson(Collections.singletonMap("score", new ConfidenceScore().getSingleDocumentScore(json)));
+        return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
     }
 
     protected String getConfidenceScoreByUrl(String jsonUrl) {
@@ -52,24 +52,24 @@ public class Router {
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
-        return new Gson().toJson(Collections.singletonMap("score", new ConfidenceScore().getSingleDocumentScore(json)));
+        return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
     }
 
     protected String getCorrelationScore(String json) {
-        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get("jsonList").getAsJsonArray();
+        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
         return new Gson().toJson(csr);
     }
 
     protected String getCorrelationScoreByRequestId(FeatureImpl feature, String storeFilePath, String configFilePath, String requestId) {
         String json = feature.getDocuments(storeFilePath, configFilePath, requestId);
-        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get("jsonList").getAsJsonArray();
+        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
         return new Gson().toJson(csr);
     }
 
     protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email) throws IOException {
-        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get("jsonList").getAsJsonArray();
+        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         String uuid = UUID.randomUUID().toString();
 
         if (jsonList.size() != request.getFileMap().size()) {
@@ -91,7 +91,7 @@ public class Router {
 //                throw new RuntimeException(e);
 //            }
 
-            String docType = request.getParameter("doc-type-" + i);
+            String docType = request.getParameter(Constant.DOCUMENT_TYPE + i);
 
             JsonObject metadataObject = doc.getAsJsonObject(Constant.JsonAttribute.META_DATA);
             MetaData metaData = new Gson().fromJson(metadataObject.toString(), MetaData.class);
@@ -101,7 +101,7 @@ public class Router {
 
             MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
             feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
-            feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter("doc-type-" + i), Constant.FileExtenstion.PDF, uuid, i);
+            feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
         }
 
         return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.SUCCESS));

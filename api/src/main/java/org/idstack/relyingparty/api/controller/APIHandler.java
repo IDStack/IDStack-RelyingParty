@@ -114,7 +114,7 @@ public class APIHandler {
      */
     @RequestMapping(value = "/{version}/{apikey}/confidence/url", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String getConfidenceScoreByUrl(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "jsonUrl") String jsonUrl) {
+    public String getConfidenceScoreByUrl(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "json_url") String jsonUrl) {
         if (!feature.validateRequest(version))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
@@ -150,7 +150,7 @@ public class APIHandler {
      */
     @RequestMapping(value = "/{version}/{apikey}/correlation/request", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String getCorrelationScoreByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "requestId") String requestId) {
+    public String getCorrelationScoreByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "request_id") String requestId) {
         if (!feature.validateRequest(version))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
@@ -184,7 +184,7 @@ public class APIHandler {
      */
     @RequestMapping(value = "/{version}/{apikey}/getdocstore/request", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String getStoredDocumentsByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "requestId") String requestId) {
+    public String getStoredDocumentsByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "request_id") String requestId) {
         if (!feature.validateRequest(version))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
