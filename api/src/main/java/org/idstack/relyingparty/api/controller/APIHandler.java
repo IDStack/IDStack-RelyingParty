@@ -211,7 +211,7 @@ public class APIHandler {
      */
     @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String evaluateDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) throws IOException {
+    public String evaluateDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email, MultipartHttpServletRequest request) {
         if (!feature.validateRequest(version))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         return router.evaluateDocuments(feature, storeFilePath, request, json, email, tmpFilePath);
