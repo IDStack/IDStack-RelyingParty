@@ -71,7 +71,7 @@ public class Router {
         return new Gson().toJson(csr);
     }
 
-    protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, MultipartHttpServletRequest request, String json, String email, String tmpFilePath) throws IOException {
+    protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, String configFilePath, MultipartHttpServletRequest request, String json, String email, String tmpFilePath, String pubFilePath) throws IOException {
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         String uuid = UUID.randomUUID().toString();
 
@@ -102,8 +102,8 @@ public class Router {
                 return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
 
             MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
-            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
-            feature.storeDocuments(pdf.getBytes(), storeFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
+            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, configFilePath, pubFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
+            feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
         }
 
         return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.SUCCESS));
