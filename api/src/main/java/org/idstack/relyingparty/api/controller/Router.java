@@ -48,8 +48,7 @@ public class Router {
     @Autowired
     private SignatureVerifier signatureVerifier;
 
-    protected String getConfidenceScore(String json, String tmpFilePath) {
-        //TODO: verification logic
+    protected String getConfidenceScore(String json) {
         return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
     }
 
@@ -64,9 +63,8 @@ public class Router {
         return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
     }
 
-    protected String getCorrelationScore(String json, String tmpFilePath) {
+    protected String getCorrelationScore(String json) {
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
-        //TODO: verification logic
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
         return new Gson().toJson(csr);
     }
