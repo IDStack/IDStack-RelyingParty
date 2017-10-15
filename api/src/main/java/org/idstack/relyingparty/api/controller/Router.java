@@ -4,9 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
+import org.idstack.feature.Parser;
 import org.idstack.feature.document.MetaData;
+import org.idstack.feature.sign.pdf.JsonPdfMapper;
+import org.idstack.feature.sign.pdf.PdfCertifier;
 import org.idstack.feature.verification.ExtractorVerifier;
 import org.idstack.feature.verification.SignatureVerifier;
 import org.idstack.relyingparty.ConfidenceScore;
@@ -23,6 +28,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -71,27 +78,44 @@ public class Router {
         return new Gson().toJson(csr);
     }
 
-    protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, String configFilePath, MultipartHttpServletRequest request, String json, String email, String tmpFilePath, String pubFilePath) throws IOException {
+    protected String evaluateDocuments(FeatureImpl feature, String storeFilePath, String configFilePath, MultipartHttpServletRequest request, String json, String email, String tmpFilePath, String pubFilePath) {
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         String uuid = UUID.randomUUID().toString();
 
         if (jsonList.size() != request.getFileMap().size())
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
 
+        Parser parser = new Parser();
         for (int i = 1; i <= jsonList.size(); i++) {
             JsonObject doc = jsonList.get(i - 1).getAsJsonObject();
 
-            //TODO: verification logic
-//            try {
-//                boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(doc.toString());
-//                if (!isValidExtractor)
-//                    return "Extractor's signature is not valid";
-//                ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(doc.toString());
-//                if (isValidValidators.contains(false))
-//                    return "One or more validator signatures are not valid";
-//            } catch (CertificateException | OperatorCreationException | CMSException e) {
-//                throw new RuntimeException(e);
-//            }
+            try {
+                boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(doc.toString(), tmpFilePath);
+                if (!isValidExtractor)
+                    return "Extractor's signature is not valid";
+                ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(doc.toString(), tmpFilePath);
+                if (isValidValidators.contains(false))
+                    return "One or more validator signatures are not valid";
+
+                MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
+                String pdfPath = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
+                String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(pdfPath);
+                String hashInJson = parser.parseDocumentJson(doc.toString()).getMetaData().getPdfHash();
+
+                if (!(hashInJson.equals(hashInPdf))) {
+                    return "Pdf and the machine readable file are not not matching each other";
+                }
+
+                PdfCertifier pdfCertifier = new PdfCertifier();
+
+                boolean verifiedPdf = pdfCertifier.verifySignatures(pdfPath);
+                if (!verifiedPdf) {
+                    return "One or more signatures in the Pdf are invalid";
+                }
+
+            } catch (OperatorCreationException | CMSException | IOException | GeneralSecurityException e) {
+                throw new RuntimeException(e);
+            }
 
             String docType = request.getParameter(Constant.DOCUMENT_TYPE + i);
 
@@ -101,9 +125,7 @@ public class Router {
             if (!docType.equals(metaData.getDocumentType()))
                 return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
 
-            MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
-            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, configFilePath, pubFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
-            feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
+            String jsonPath = feature.storeDocuments(doc.toString().getBytes(), storeFilePath, configFilePath, pubFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
         }
 
         return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.SUCCESS));
