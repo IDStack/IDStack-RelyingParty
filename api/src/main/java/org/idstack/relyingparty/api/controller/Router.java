@@ -96,18 +96,20 @@ public class Router {
                     return "One or more validator signatures are not valid";
 
                 MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
-                String pdfPath = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
-                String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(pdfPath);
+                String pdfUrl = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
+                String localPdfPath = feature.parseUrlAsLocalFilePath(pdfUrl, pubFilePath);
+
+                String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(localPdfPath);
                 String hashInJson = parser.parseDocumentJson(doc.toString()).getMetaData().getPdfHash();
 
                 //TODO : uncomment after modifying hashing mechanism
                 if (!(hashInJson.equals(hashInPdf))) {
-//                    return "Pdf and the machine readable file are not not matching each other";
+                    //return "Pdf and the machine readable file are not not matching each other";
                 }
 
                 PdfCertifier pdfCertifier = new PdfCertifier();
 
-                boolean verifiedPdf = pdfCertifier.verifySignatures(pdfPath);
+                boolean verifiedPdf = pdfCertifier.verifySignatures(localPdfPath);
                 if (!verifiedPdf) {
                     return "One or more signatures in the Pdf are invalid";
                 }
@@ -124,7 +126,7 @@ public class Router {
             if (!docType.equals(metaData.getDocumentType()))
                 return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
 
-            String jsonPath = feature.storeDocuments(doc.toString().getBytes(), storeFilePath, configFilePath, pubFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
+            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, configFilePath, pubFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
         }
 
         return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.SUCCESS));
