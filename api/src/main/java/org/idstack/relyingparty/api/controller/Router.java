@@ -97,9 +97,9 @@ public class Router {
 
                 MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
                 String pdfUrl = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
-                String localPdfPath = feature.parseUrlAsLocalFilePath(pdfUrl, pubFilePath);
+                String pdfPath = feature.parseUrlAsLocalFilePath(pdfUrl, pubFilePath);
 
-                String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(localPdfPath);
+                String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(pdfPath);
                 String hashInJson = parser.parseDocumentJson(doc.toString()).getMetaData().getPdfHash();
 
                 //TODO : uncomment after modifying hashing mechanism
@@ -109,7 +109,7 @@ public class Router {
 
                 PdfCertifier pdfCertifier = new PdfCertifier();
 
-                boolean verifiedPdf = pdfCertifier.verifySignatures(localPdfPath);
+                boolean verifiedPdf = pdfCertifier.verifySignatures(pdfPath);
                 if (!verifiedPdf) {
                     return "One or more signatures in the Pdf are invalid";
                 }
