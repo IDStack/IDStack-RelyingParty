@@ -100,6 +100,9 @@ public class Router {
                 String pdfPath = feature.parseUrlAsLocalFilePath(pdfUrl, pubFilePath);
 
                 String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(pdfPath);
+                if (hashInPdf == null)
+                    return "Upload a signed pdf";
+
                 String hashInJson = parser.parseDocumentJson(doc.toString()).getMetaData().getPdfHash();
 
                 //TODO : uncomment after modifying hashing mechanism
