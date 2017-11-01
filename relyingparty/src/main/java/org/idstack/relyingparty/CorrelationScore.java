@@ -83,6 +83,8 @@ public class CorrelationScore {
             String name = getConcatenatedValue(doc, Constant.Attribute.NAME);
             if (!name.isEmpty()) {
                 names.add(name);
+            } else {
+                names.add("-");
             }
         }
 
@@ -101,7 +103,7 @@ public class CorrelationScore {
             if (!name.isEmpty()) {
                 names.add(name);
             } else {
-                names.add("");
+                names.add("-");
             }
         }
 
@@ -131,7 +133,7 @@ public class CorrelationScore {
                 }
             }
             if (nic.isEmpty()) {
-                nic = "";
+                nic = "-";
                 Integer count = candidates.get(nic);
                 candidates.put("", count != null ? count + 1 : 1);
             }
@@ -175,7 +177,7 @@ public class CorrelationScore {
                 }
             }
             if (nic.isEmpty()) {
-                nic = "";
+                nic = "-";
                 Integer count = candidates.get(nic);
                 candidates.put("", count != null ? count + 1 : 1);
             }
@@ -209,7 +211,7 @@ public class CorrelationScore {
         Map<Integer, Integer> candidates = new HashMap<>();
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
-            String gender = "";
+            String gender = "-";
             //iterate over "gender" attributes
             for (String attributeName : Constant.Attribute.SEX.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
