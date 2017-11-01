@@ -124,6 +124,14 @@ public class NameScore {
         //TODO detect and remove/process initials
 
         int nameCount = this.names.size();
+        ArrayList<AttributeScore> docScores = new ArrayList<>(nameCount);
+        if (nameCount <= 1) {
+            if (nameCount == 1) {
+                AttributeScore as = new AttributeScore(this.names.get(0), 0.00);
+                docScores.add(as);
+            }
+            return docScores;
+        }
         double[][] pairScores = new double[nameCount][nameCount];
         for (int i = 0; i < nameCount; i++) {
             for (int j = 0; j < nameCount; j++) {
@@ -141,7 +149,7 @@ public class NameScore {
                 pairScores[j][i] = score;
             }
         }
-        ArrayList<AttributeScore> docScores = new ArrayList<>(nameCount);
+
         for (int i = 0; i < nameCount; i++) {
             double rowSum = DoubleStream.of(pairScores[i]).sum();
 
