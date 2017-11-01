@@ -50,7 +50,7 @@ public class ConfidenceScore {
 
         //algo
         //TODO set different weights for content and signatures
-        double score = (double) ((2 * signatureSigns / (allSigns - 1)) + contentSigns) * 100 / (2 * allSigns);
+        double score = (allSigns <= 1) ? 100 : (double) ((2 * signatureSigns / (allSigns - 1)) + contentSigns) * 100 / (2 * allSigns);
 
         //round off to 2 decimal places
         DecimalFormat df = new DecimalFormat("#.##");

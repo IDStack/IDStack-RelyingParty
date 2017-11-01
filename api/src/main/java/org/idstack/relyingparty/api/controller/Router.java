@@ -90,27 +90,31 @@ public class Router {
             try {
                 boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(doc.toString(), tmpFilePath);
                 if (!isValidExtractor)
-                    return "Extractor's signature is not valid";
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_EXTRACTOR_SIGNATURE));
                 ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(doc.toString(), tmpFilePath);
                 if (isValidValidators.contains(false))
-                    return "One or more validator signatures are not valid";
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VALIDATOR_SIGNATURE));
 
                 MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
-                String pdfPath = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
+                String pdfUrl = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
+                String pdfPath = feature.parseUrlAsLocalFilePath(pdfUrl, pubFilePath);
+
                 String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(pdfPath);
+                if (hashInPdf == null)
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PDF_NOT_SIGNED));
+
                 String hashInJson = parser.parseDocumentJson(doc.toString()).getMetaData().getPdfHash();
 
                 //TODO : uncomment after modifying hashing mechanism
                 if (!(hashInJson.equals(hashInPdf))) {
-//                    return "Pdf and the machine readable file are not not matching each other";
+                    //return "Pdf and the machine readable file are not not matching each other";
                 }
 
                 PdfCertifier pdfCertifier = new PdfCertifier();
 
                 boolean verifiedPdf = pdfCertifier.verifySignatures(pdfPath);
-                if (!verifiedPdf) {
-                    return "One or more signatures in the Pdf are invalid";
-                }
+                if (!verifiedPdf)
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PDF_SIGNATURES));
 
             } catch (OperatorCreationException | CMSException | IOException | GeneralSecurityException e) {
                 throw new RuntimeException(e);
@@ -124,7 +128,7 @@ public class Router {
             if (!docType.equals(metaData.getDocumentType()))
                 return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
 
-            String jsonPath = feature.storeDocuments(doc.toString().getBytes(), storeFilePath, configFilePath, pubFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
+            feature.storeDocuments(doc.toString().getBytes(), storeFilePath, configFilePath, pubFilePath, email, metaData.getDocumentType(), Constant.FileExtenstion.JSON, uuid, i);
         }
 
         return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.SUCCESS));
