@@ -230,7 +230,6 @@ public class APIHandler {
      * @param email   email of the sender
      * @param request request object for access the signed pdf files
      * @return status of saving
-     * @throws IOException if file cannot be converted into bytes
      */
     @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
