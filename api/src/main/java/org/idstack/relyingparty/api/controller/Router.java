@@ -133,7 +133,7 @@ public class Router {
                 String pdfUrl = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, documentType, Constant.FileExtenstion.PDF, uuid, i);
                 String pdfPath = feature.parseUrlAsLocalFilePath(pdfUrl, pubFilePath);
 
-                if (Files.exists(Paths.get(pdfPath)))
+                if (!Files.exists(Paths.get(pdfPath)))
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_FILE_NOT_FOUND));
 
                 String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(pdfPath);
