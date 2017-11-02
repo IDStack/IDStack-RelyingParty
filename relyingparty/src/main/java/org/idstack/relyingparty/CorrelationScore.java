@@ -22,7 +22,6 @@ import java.util.*;
 @SuppressWarnings("Duplicates")
 public class CorrelationScore {
 
-
     /**
      * @param documentJSONs
      * @return a map of String keys and double[] values (array of name scores of documents)
