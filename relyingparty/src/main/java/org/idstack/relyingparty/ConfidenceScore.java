@@ -1,6 +1,5 @@
 package org.idstack.relyingparty;
 
-import org.idstack.feature.Parser;
 import org.idstack.feature.document.Document;
 import org.idstack.feature.document.Validator;
 
@@ -16,12 +15,10 @@ public class ConfidenceScore {
     /**
      * Calculates a score for a single document based on the document's signed attributes by signers.
      *
-     * @param documentJSON, a String representation of a valid JSON object
+     * @param doc parsed document object
      * @return calculated score
      */
-    public double getSingleDocumentScore(String documentJSON) {
-
-        Document doc = Parser.parseDocumentJson(documentJSON);
+    public double getSingleDocumentScore(Document doc) {
 
         //100% if issuer = extractor
         String issuerURL = doc.getMetaData().getIssuer().getUrl();

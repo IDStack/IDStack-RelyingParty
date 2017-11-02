@@ -31,8 +31,12 @@ public class CorrelationScore {
         int docsLength = documentJSONs.size();
         Document[] docs = new Document[docsLength];
         for (int i = 0; i < docsLength; i++) {
-            Document doc = Parser.parseDocumentJson(documentJSONs.get(i).toString());
-            docs[i] = doc;
+            try {
+                Document doc = Parser.parseDocumentJson(documentJSONs.get(i).toString());
+                docs[i] = doc;
+            } catch (Exception e) {
+                return null;
+            }
         }
         SuperAttribute name = new SuperAttribute(getNameCorrelationScore(docs));
         SuperAttribute address = new SuperAttribute(getAddressCorrelationScore(docs));

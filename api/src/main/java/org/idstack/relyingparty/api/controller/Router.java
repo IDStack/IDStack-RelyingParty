@@ -9,6 +9,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.Parser;
+import org.idstack.feature.document.Document;
 import org.idstack.feature.document.MetaData;
 import org.idstack.feature.sign.pdf.JsonPdfMapper;
 import org.idstack.feature.sign.pdf.PdfCertifier;
@@ -49,7 +50,14 @@ public class Router {
     private SignatureVerifier signatureVerifier;
 
     protected String getConfidenceScore(String json) {
-        return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
+        Document document;
+        try {
+            document = Parser.parseDocumentJson(json);
+        } catch (Exception e) {
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
+        }
+
+        return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(document)));
     }
 
     protected String getConfidenceScoreByUrl(String jsonUrl, String pubFilePath) {
@@ -60,12 +68,22 @@ public class Router {
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
-        return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(json)));
+
+        Document document;
+        try {
+            document = Parser.parseDocumentJson(json);
+        } catch (Exception e) {
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
+        }
+
+        return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(document)));
     }
 
     protected String getCorrelationScore(String json) {
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
+        if (csr == null)
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
         return new Gson().toJson(csr);
     }
 
@@ -73,6 +91,8 @@ public class Router {
         String json = feature.getDocuments(storeFilePath, requestId);
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
+        if (csr == null)
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
         return new Gson().toJson(csr);
     }
 
@@ -83,7 +103,6 @@ public class Router {
         if (jsonList.size() != request.getFileMap().size())
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER));
 
-        Parser parser = new Parser();
         for (int i = 1; i <= jsonList.size(); i++) {
             JsonObject doc = jsonList.get(i - 1).getAsJsonObject();
 
@@ -114,11 +133,21 @@ public class Router {
                 String pdfUrl = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, documentType, Constant.FileExtenstion.PDF, uuid, i);
                 String pdfPath = feature.parseUrlAsLocalFilePath(pdfUrl, pubFilePath);
 
+                if (Files.exists(Paths.get(pdfPath)))
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_FILE_NOT_FOUND));
+
                 String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(pdfPath);
                 if (hashInPdf == null)
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PDF_NOT_SIGNED));
 
-                String hashInJson = parser.parseDocumentJson(doc.toString()).getMetaData().getPdfHash();
+                Document document;
+                try {
+                    document = Parser.parseDocumentJson(doc.toString());
+                } catch (Exception e) {
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
+                }
+
+                String hashInJson = document.getMetaData().getPdfHash();
 
                 //TODO : uncomment after modifying hashing mechanism
                 if (!(hashInJson.equals(hashInPdf))) {
