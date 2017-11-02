@@ -91,12 +91,27 @@ public class Router {
                 boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(doc.toString(), tmpFilePath);
                 if (!isValidExtractor)
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_EXTRACTOR_SIGNATURE));
+
                 ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(doc.toString(), tmpFilePath);
                 if (isValidValidators.contains(false))
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VALIDATOR_SIGNATURE));
 
+                String documentType = request.getParameter(Constant.DOCUMENT_TYPE + i);
+                if (documentType.isEmpty())
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
+            } catch (OperatorCreationException | CMSException | IOException | GeneralSecurityException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        for (int i = 1; i <= jsonList.size(); i++) {
+            JsonObject doc = jsonList.get(i - 1).getAsJsonObject();
+
+            try {
                 MultipartFile pdf = request.getFileMap().get(String.valueOf(i));
-                String pdfUrl = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, request.getParameter(Constant.DOCUMENT_TYPE + i), Constant.FileExtenstion.PDF, uuid, i);
+                String documentType = request.getParameter(Constant.DOCUMENT_TYPE + i);
+
+                String pdfUrl = feature.storeDocuments(pdf.getBytes(), storeFilePath, configFilePath, pubFilePath, email, documentType, Constant.FileExtenstion.PDF, uuid, i);
                 String pdfPath = feature.parseUrlAsLocalFilePath(pdfUrl, pubFilePath);
 
                 String hashInPdf = new JsonPdfMapper().getHashOfTheOriginalContent(pdfPath);
@@ -116,7 +131,7 @@ public class Router {
                 if (!verifiedPdf)
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PDF_SIGNATURES));
 
-            } catch (OperatorCreationException | CMSException | IOException | GeneralSecurityException e) {
+            } catch (IOException | GeneralSecurityException e) {
                 throw new RuntimeException(e);
             }
 
