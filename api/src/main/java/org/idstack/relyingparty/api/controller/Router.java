@@ -88,7 +88,7 @@ public class Router {
     }
 
     protected String getCorrelationScoreByRequestId(FeatureImpl feature, String storeFilePath, String configFilePath, String requestId) {
-        String json = feature.getDocuments(storeFilePath, requestId);
+        String json = feature.getDocumentListByRequestId(storeFilePath, requestId);
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
         if (csr == null)
