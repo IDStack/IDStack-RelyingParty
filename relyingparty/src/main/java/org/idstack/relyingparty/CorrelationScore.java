@@ -269,7 +269,7 @@ public class CorrelationScore {
 
         //check if all values are equal
         Set<Integer> values = new HashSet<>(candidates.values());
-        if (values.size() == 1) {
+        if (candidates.values().size()>1 && values.size() == 1) {
             return this.EMPTY_VALUE;
         }
 
@@ -293,7 +293,7 @@ public class CorrelationScore {
 
         //check if all values are equal
         Set<Integer> values = new HashSet<>(candidates.values());
-        if (values.size() == 1) {
+        if (candidates.values().size()>1 && values.size() == 1) {
             return 0;
         }
 
