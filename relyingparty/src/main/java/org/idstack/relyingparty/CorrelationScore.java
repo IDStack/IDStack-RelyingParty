@@ -22,6 +22,8 @@ import java.util.*;
 @SuppressWarnings("Duplicates")
 public class CorrelationScore {
 
+    public static final String EMPTY_VALUE = "-";
+
     /**
      * @param documentJSONs
      * @return a map of String keys and double[] values (array of name scores of documents)
@@ -87,7 +89,7 @@ public class CorrelationScore {
             if (!name.isEmpty()) {
                 names.add(name);
             } else {
-                names.add("-");
+                names.add(this.EMPTY_VALUE);
             }
         }
 
@@ -106,7 +108,7 @@ public class CorrelationScore {
             if (!name.isEmpty()) {
                 names.add(name);
             } else {
-                names.add("-");
+                names.add(this.EMPTY_VALUE);
             }
         }
 
@@ -136,7 +138,7 @@ public class CorrelationScore {
                 }
             }
             if (nic.isEmpty()) {
-                nic = "-";
+                nic = this.EMPTY_VALUE;
                 Integer count = candidates.get(nic);
                 candidates.put("", count != null ? count + 1 : 1);
             }
@@ -152,7 +154,7 @@ public class CorrelationScore {
         }
         //set scores
         for (int i = 0; i < docs.length; i++) {
-            double score = (!popular.isEmpty() && nics[i].equals(popular)) ? 100 : 0;
+            double score = (!popular.equals(this.EMPTY_VALUE) && nics[i].equals(popular)) ? 100 : 0;
             AttributeScore as = new AttributeScore(nics[i], score);
 
             attrScore.add(as);
@@ -180,7 +182,7 @@ public class CorrelationScore {
                 }
             }
             if (nic.isEmpty()) {
-                nic = "-";
+                nic = this.EMPTY_VALUE;
                 Integer count = candidates.get(nic);
                 candidates.put("", count != null ? count + 1 : 1);
             }
@@ -192,11 +194,10 @@ public class CorrelationScore {
         String popular = "";
         if (!candidates.isEmpty()) {
             popular = getPopularString(candidates);
-
         }
         //set scores
         for (int i = 0; i < docs.length; i++) {
-            double score = (!popular.isEmpty() && nics[i].equals(popular)) ? 100 : 0;
+            double score = (!popular.equals(this.EMPTY_VALUE) && nics[i].equals(popular)) ? 100 : 0;
             AttributeScore as = new AttributeScore(nics[i], score);
             attrScore.add(as);
         }
@@ -214,7 +215,7 @@ public class CorrelationScore {
         Map<Integer, Integer> candidates = new HashMap<>();
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
-            String gender = "-";
+            String gender = this.EMPTY_VALUE;
             //iterate over "gender" attributes
             for (String attributeName : Constant.Attribute.SEX.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
@@ -262,10 +263,14 @@ public class CorrelationScore {
     }
 
     private String getPopularString(Map<String, Integer> candidates) {
-        if (candidates.get("") != null) {
-            if (candidates.get("") >= candidates.size() / 2) {
-                return "";
-            }
+        if (candidates.get(this.EMPTY_VALUE) != null && candidates.get(this.EMPTY_VALUE) >= candidates.size() / 2) {
+            return this.EMPTY_VALUE;
+        }
+
+        //check if all values are equal
+        Set<Integer> values = new HashSet<>(candidates.values());
+        if (values.size() == 1) {
+            return this.EMPTY_VALUE;
         }
 
         String popular = Collections.max(candidates.entrySet(),
@@ -280,12 +285,18 @@ public class CorrelationScore {
     }
 
     private int getPopularInt(Map<Integer, Integer> candidates) {
-        if (candidates.get(0) != null) {
-            if (candidates.get(0) >= candidates.size() / 2) {
-                //if half or more entries are empty, the popular is the empty
-                return 0;
-            }
+        if (candidates.get(0) != null && candidates.get(0) >= candidates.size() / 2) {
+            //if half or more entries are empty, the popular is the empty
+            return 0;
+
         }
+
+        //check if all values are equal
+        Set<Integer> values = new HashSet<>(candidates.values());
+        if (values.size() == 1) {
+            return 0;
+        }
+
         int popular = Collections.max(candidates.entrySet(),
                 new Comparator<Map.Entry<Integer, Integer>>() {
                     @Override
