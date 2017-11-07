@@ -9,8 +9,12 @@ import java.util.ArrayList;
  */
 public class SuperAttribute {
     private double avgScore;
-    private int status;
+    private String avgColorCode;
     ArrayList<AttributeScore> values;
+
+    private static final String colorRed = "#F00501";
+    private static final String colorYellow = "#EFD101";
+    private static final String colorGreen = "#66BB2A";
 
     public SuperAttribute(ArrayList<AttributeScore> values) {
         this.values = values;
@@ -21,14 +25,18 @@ public class SuperAttribute {
             docCount++;
         }
         double avg = tot / docCount;
-        int stat = 0;
-        if (avg == 0) {
-            //TODO add constant
-            stat = -1;
-        } else if (avg == 100) {
-            stat = 1;
-        }
         this.avgScore = avg;
-        this.status = stat;
+        this.avgColorCode = getColorCode(avg);
+    }
+
+    public static String getColorCode(double avg) {
+        String stat = colorYellow;
+        if (avg < 25) {
+            //TODO add constant
+            stat = colorRed;
+        } else if (avg > 90) {
+            stat = colorGreen;
+        }
+        return stat;
     }
 }
