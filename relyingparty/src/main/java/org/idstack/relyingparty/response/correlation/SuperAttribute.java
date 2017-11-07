@@ -1,4 +1,4 @@
-package org.idstack.relyingparty.response;
+package org.idstack.relyingparty.response.correlation;
 
 import java.util.ArrayList;
 
@@ -10,11 +10,7 @@ import java.util.ArrayList;
 public class SuperAttribute {
     private double avgScore;
     private String avgColorCode;
-    ArrayList<AttributeScore> values;
-
-    private static final String colorRed = "#F00501";
-    private static final String colorYellow = "#EFD101";
-    private static final String colorGreen = "#66BB2A";
+    private ArrayList<AttributeScore> values;
 
     public SuperAttribute(ArrayList<AttributeScore> values) {
         this.values = values;
@@ -30,6 +26,9 @@ public class SuperAttribute {
     }
 
     public static String getColorCode(double avg) {
+        String colorRed = "#F00501";
+        String colorYellow = "#EFD101";
+        String colorGreen = "#66BB2A";
         String stat = colorYellow;
         if (avg < 25) {
             //TODO add constant

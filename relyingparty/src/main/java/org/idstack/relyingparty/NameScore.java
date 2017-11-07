@@ -9,7 +9,7 @@ package org.idstack.relyingparty;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
-import org.idstack.relyingparty.response.AttributeScore;
+import org.idstack.relyingparty.response.correlation.AttributeScore;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

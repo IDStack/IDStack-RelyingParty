@@ -7,9 +7,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.idstack.feature.Constant;
 import org.idstack.feature.Parser;
 import org.idstack.feature.document.Document;
-import org.idstack.relyingparty.response.AttributeScore;
-import org.idstack.relyingparty.response.CorrelationScoreResponse;
-import org.idstack.relyingparty.response.SuperAttribute;
+import org.idstack.relyingparty.response.correlation.AttributeScore;
+import org.idstack.relyingparty.response.correlation.CorrelationScoreResponse;
+import org.idstack.relyingparty.response.correlation.SuperAttribute;
 
 import java.util.*;
 

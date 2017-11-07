@@ -17,7 +17,7 @@ import org.idstack.feature.verification.ExtractorVerifier;
 import org.idstack.feature.verification.SignatureVerifier;
 import org.idstack.relyingparty.ConfidenceScore;
 import org.idstack.relyingparty.CorrelationScore;
-import org.idstack.relyingparty.response.CorrelationScoreResponse;
+import org.idstack.relyingparty.response.correlation.CorrelationScoreResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
