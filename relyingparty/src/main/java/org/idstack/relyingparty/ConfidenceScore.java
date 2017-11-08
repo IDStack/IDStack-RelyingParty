@@ -2,6 +2,7 @@ package org.idstack.relyingparty;
 
 import org.idstack.feature.document.Document;
 import org.idstack.feature.document.Validator;
+import org.idstack.relyingparty.response.confidence.ConfidenceScoreResponse;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -18,13 +19,14 @@ public class ConfidenceScore {
      * @param doc parsed document object
      * @return calculated score
      */
-    public double getSingleDocumentScore(Document doc) {
+    public ConfidenceScoreResponse getSingleDocumentScore(Document doc) {
 
         //100% if issuer = extractor
         String issuerURL = doc.getMetaData().getIssuer().getUrl();
         String extractorURL = doc.getExtractor().getSignature().getUrl();
         if (issuerURL.equals(extractorURL)) {
-            return 100;
+            ConfidenceScoreResponse confidenceScoreResponse = new ConfidenceScoreResponse(100, null);
+            return confidenceScoreResponse;
         }
 
         //else
@@ -53,6 +55,7 @@ public class ConfidenceScore {
         DecimalFormat df = new DecimalFormat("#.##");
         score = Double.valueOf(df.format(score));
 
-        return score;
+        ConfidenceScoreResponse confidenceScoreResponse = new ConfidenceScoreResponse(score, null);
+        return confidenceScoreResponse;
     }
 }

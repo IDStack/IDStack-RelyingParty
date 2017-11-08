@@ -1,4 +1,4 @@
-package org.idstack.relyingparty.response;
+package org.idstack.relyingparty.response.correlation;
 
 /**
  * @author Sachithra Dangalla

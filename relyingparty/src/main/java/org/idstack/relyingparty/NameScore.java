@@ -9,7 +9,7 @@ package org.idstack.relyingparty;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
-import org.idstack.relyingparty.response.AttributeScore;
+import org.idstack.relyingparty.response.correlation.AttributeScore;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -132,6 +132,8 @@ public class NameScore {
             }
             return docScores;
         }
+
+
         double[][] pairScores = new double[nameCount][nameCount];
         for (int i = 0; i < nameCount; i++) {
             for (int j = 0; j < nameCount; j++) {
@@ -151,13 +153,17 @@ public class NameScore {
         }
 
         for (int i = 0; i < nameCount; i++) {
-            double rowSum = DoubleStream.of(pairScores[i]).sum();
+            String name = this.names.get(i);
+            double score = 0;
+            if (!name.equals(CorrelationScore.EMPTY_VALUE)) {
+                double rowSum = DoubleStream.of(pairScores[i]).sum();
 
-            //round off to 2 decimal places
-            double score = rowSum / (nameCount - 1);
-            DecimalFormat df = new DecimalFormat("#.##");
-            score = Double.valueOf(df.format(score));
-            AttributeScore as = new AttributeScore(this.names.get(i), score);
+                //round off to 2 decimal places
+                score = rowSum / (nameCount - 1);
+                DecimalFormat df = new DecimalFormat("#.##");
+                score = Double.valueOf(df.format(score));
+            }
+            AttributeScore as = new AttributeScore(name, score);
             docScores.add(as);
         }
 

@@ -1,4 +1,4 @@
-package org.idstack.relyingparty.response;
+package org.idstack.relyingparty.response.correlation;
 
 /**
  * @author Sachithra Dangalla
@@ -8,10 +8,12 @@ package org.idstack.relyingparty.response;
 public class AttributeScore {
     private String text;
     private double score;
+    private String colorCode;
 
     public AttributeScore(String text, double score) {
         this.text = text;
         this.score = score;
+        this.colorCode = SuperAttribute.getColorCode(score);
     }
 
     public double getScore() {
