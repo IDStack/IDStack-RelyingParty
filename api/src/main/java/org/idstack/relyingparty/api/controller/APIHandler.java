@@ -189,7 +189,7 @@ public class APIHandler {
      * @param apikey  api key
      * @return document list
      */
-    @RequestMapping(value = "/{version}/{apikey}/getdocstore/request", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/getdoc/request", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getStoredDocumentsByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "request_id") String requestId) {
         if (!feature.validateRequest(version))
@@ -208,7 +208,7 @@ public class APIHandler {
      * @param apikey  api key
      * @return document list
      */
-    @RequestMapping(value = "/{version}/{apikey}/getdocstore/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/getdoc/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getStoredDocument(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "json_url") String jsonUrl) {
         if (!feature.validateRequest(version))
