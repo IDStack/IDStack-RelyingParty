@@ -147,7 +147,7 @@ public class Router {
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
                 }
 
-                String hashInJson = document.getMetaData().getPdfHash();
+                String hashInJson = document.getMetaData().getPdf();
 
                 //TODO : uncomment after modifying hashing mechanism
                 if (!(hashInJson.equals(hashInPdf))) {
