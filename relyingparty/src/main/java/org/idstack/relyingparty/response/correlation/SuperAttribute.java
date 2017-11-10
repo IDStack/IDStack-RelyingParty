@@ -1,5 +1,6 @@
 package org.idstack.relyingparty.response.correlation;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
@@ -8,7 +9,7 @@ import java.util.ArrayList;
  * @since 1.0
  */
 public class SuperAttribute {
-    private double avgScore;
+    private String avgScore;
     private String status;
     private ArrayList<AttributeScore> values;
 
@@ -21,7 +22,7 @@ public class SuperAttribute {
             docCount++;
         }
         double avg = tot / docCount;
-        this.avgScore = avg;
+        this.avgScore = formatScore(avg);
         this.status = getStatus(avg);
     }
 
@@ -37,5 +38,11 @@ public class SuperAttribute {
             stat = colorGreen;
         }
         return stat;
+    }
+
+    public static String formatScore(double score) {
+        //round off to 2 decimal places
+        DecimalFormat df = new DecimalFormat("#.##");
+        return df.format(score);
     }
 }

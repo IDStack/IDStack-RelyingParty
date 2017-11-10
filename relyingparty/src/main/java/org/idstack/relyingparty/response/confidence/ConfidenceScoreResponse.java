@@ -1,5 +1,7 @@
 package org.idstack.relyingparty.response.confidence;
 
+import org.idstack.relyingparty.response.correlation.SuperAttribute;
+
 import java.util.ArrayList;
 
 /**
@@ -8,11 +10,11 @@ import java.util.ArrayList;
  * @since 1.0
  */
 public class ConfidenceScoreResponse {
-    private double score;
+    private String score;
     ArrayList<TestResult> tests;
 
     public ConfidenceScoreResponse(double score, ArrayList<TestResult> tests) {
-        this.score = score;
+        this.score = SuperAttribute.formatScore(score);
         this.tests = tests;
     }
 }
