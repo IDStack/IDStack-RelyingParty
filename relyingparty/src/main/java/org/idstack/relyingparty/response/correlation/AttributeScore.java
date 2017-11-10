@@ -8,12 +8,12 @@ package org.idstack.relyingparty.response.correlation;
 public class AttributeScore {
     private String text;
     private double score;
-    private String colorCode;
+    private String status;
 
     public AttributeScore(String text, double score) {
         this.text = text;
         this.score = score;
-        this.colorCode = SuperAttribute.getColorCode(score);
+        this.status = SuperAttribute.getStatus(score);
     }
 
     public double getScore() {

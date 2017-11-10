@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 public class SuperAttribute {
     private double avgScore;
-    private String avgColorCode;
+    private String status;
     private ArrayList<AttributeScore> values;
 
     public SuperAttribute(ArrayList<AttributeScore> values) {
@@ -22,13 +22,13 @@ public class SuperAttribute {
         }
         double avg = tot / docCount;
         this.avgScore = avg;
-        this.avgColorCode = getColorCode(avg);
+        this.status = getStatus(avg);
     }
 
-    public static String getColorCode(double avg) {
-        String colorRed = "#F00501";
-        String colorYellow = "#EFD101";
-        String colorGreen = "#66BB2A";
+    public static String getStatus(double avg) {
+        String colorRed = "danger";
+        String colorYellow = "warning";
+        String colorGreen = "success";
         String stat = colorYellow;
         if (avg < 25) {
             //TODO add constant
