@@ -1,8 +1,5 @@
 package org.idstack.relyingparty.sanitychecks;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import org.idstack.feature.document.Document;
 import org.idstack.relyingparty.response.confidence.TestResult;
 
@@ -61,7 +58,7 @@ public class DocumentTest {
         if (date1 == null || date2 == null) {
             return null;
         }
-        String message = "Date Order Check:  " + name1 + "  <  " + name2;
+        String message = "  " + name1 + "     <     " + name2;
         boolean status = false;
         if (date1.before(date2)) {
             status = true;
@@ -73,7 +70,7 @@ public class DocumentTest {
         if (dob == null) {
             return null;
         }
-        String message = "NIC Check: Match Date of Birth";
+        String message = "NIC match with Date of Birth";
         String year = "19" + nic.substring(0, 2);
         String dobYear = new SimpleDateFormat("yyyy").format(dob);
 
@@ -92,7 +89,7 @@ public class DocumentTest {
     }
 
     public TestResult checkNicGenderValidity(String nic, int gender) {
-        String message = "NIC Check: Match Gender";
+        String message = "NIC match with Gender";
         int nicValue = Integer.parseInt(nic.substring(2, 5));
         int nicGender = nicValue < 500 ? 0 : 1;
         TestResult testResult = new TestResult(message, gender == nicGender);
@@ -101,7 +98,7 @@ public class DocumentTest {
 
     public TestResult checkNICFormat(String nic) {
         //TODO check multiple formats
-        String message = "NIC Format: ";
+        String message = " NIC format";
         int year = Integer.parseInt(nic.substring(0, 2)) + 1900;
         boolean status = false;
         String validity = "Invalid";
@@ -111,7 +108,7 @@ public class DocumentTest {
                 validity = "Valid";
             }
         }
-        TestResult testResult = new TestResult(message + validity, status);
+        TestResult testResult = new TestResult(validity + message, status);
         return testResult;
     }
 
@@ -119,7 +116,7 @@ public class DocumentTest {
         if (!countryCode.equals("LKA")) {
             return null;
         }
-        String message = "Passport Number Format : ";
+        String message = " Passport Number format";
         String validity = "Invalid";
         boolean status = false;
         Map<String, String> passportCodes = new HashMap<>();
@@ -131,7 +128,7 @@ public class DocumentTest {
             status = true;
             validity = "Valid";
         }
-        TestResult testResult = new TestResult(message + validity, status);
+        TestResult testResult = new TestResult(validity + message, status);
         return testResult;
     }
 
