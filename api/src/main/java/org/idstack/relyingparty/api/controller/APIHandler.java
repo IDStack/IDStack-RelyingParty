@@ -206,7 +206,8 @@ public class APIHandler {
      *
      * @param version api version
      * @param apikey  api key
-     * @return document list
+     * @param jsonUrl json url
+     * @return document
      */
     @RequestMapping(value = "/{version}/{apikey}/getdoc/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
