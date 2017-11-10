@@ -2,7 +2,6 @@ package org.idstack.relyingparty;
 
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.tuple.Pair;
 import org.idstack.feature.Constant;
 import org.idstack.feature.Parser;
@@ -53,24 +52,11 @@ public class CorrelationScore {
     private String getConcatenatedValue(Document doc, Pair<String, String[]> attribute) {
         String name;
         StringJoiner sb = new StringJoiner(" ");
-        LinkedHashMap<String, Object> content = doc.getContent();
-        Map<String, String> flatAttributeMap = new HashMap<>();
+        LinkedHashMap<String, String> content = doc.getContent();
+//        Map<String, String> flatAttributeMap = new HashMap<>();
+
         for (String attributeName : attribute.getRight()) {
-            if (content.get(attributeName) != null) {
-                Object value = content.get(attributeName);
-                if (value instanceof JsonPrimitive) {
-                    flatAttributeMap.put(attributeName, ((JsonPrimitive) value).getAsString());
-                } else {
-                    //assume only one nested level
-                    LinkedHashMap<String, Object> names = (LinkedHashMap<String, Object>) value;
-                    for (String key : names.keySet()) {
-                        flatAttributeMap.put(key, (((JsonPrimitive) names.get(key)).getAsString()));
-                    }
-                }
-            }
-        }
-        for (String attributeName : attribute.getRight()) {
-            String nameSeg = flatAttributeMap.get(attributeName);
+            String nameSeg = content.get(attributeName);
             if (nameSeg != null) {
                 sb.add(nameSeg);
             }
@@ -131,7 +117,7 @@ public class CorrelationScore {
             //iterate over "dob" attributes
             for (String attributeName : Constant.Attribute.DOB.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
-                    nic = ((JsonPrimitive) doc.getContent().get(attributeName)).getAsString().toLowerCase();
+                    nic = doc.getContent().get(attributeName).toLowerCase();
                     Integer count = candidates.get(nic);
                     candidates.put(nic, count != null ? count + 1 : 1);
                     break;
@@ -174,7 +160,7 @@ public class CorrelationScore {
             //iterate over "nic" attributes
             for (String attributeName : Constant.Attribute.NIC.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
-                    nic = ((JsonPrimitive) doc.getContent().get(attributeName)).getAsString().toLowerCase();
+                    nic = doc.getContent().get(attributeName).toLowerCase();
                     Integer count = candidates.get(nic);
                     candidates.put(nic, count != null ? count + 1 : 1);
 
@@ -219,20 +205,11 @@ public class CorrelationScore {
             //iterate over "gender" attributes
             for (String attributeName : Constant.Attribute.SEX.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
-                    gender = ((JsonPrimitive) doc.getContent().get(attributeName)).getAsString().toLowerCase();
+                    gender = doc.getContent().get(attributeName).toLowerCase();
 
                     //determine the target class of the value
-                    int targetClass = 0;
-                    for (int j = 0; j < Constant.Attribute.Gender.TARGET_CLASSES.length; j++) {
-                        String[] targetClassValues = Constant.Attribute.Gender.TARGET_CLASSES[j];
-                        for (String s : targetClassValues) {
-                            if (gender.equals(s)) {
-                                genders[i] = j;
-                                targetClass = j;
-                                break;
-                            }
-                        }
-                    }
+                    int targetClass = getGenderClass(gender);
+                    genders[i] = targetClass;
 
                     Integer count = candidates.get(targetClass);
                     candidates.put(targetClass + 1, count != null ? count + 1 : 1);
@@ -269,7 +246,7 @@ public class CorrelationScore {
 
         //check if all values are equal
         Set<Integer> values = new HashSet<>(candidates.values());
-        if (candidates.values().size()>1 && values.size() == 1) {
+        if (candidates.values().size() > 1 && values.size() == 1) {
             return this.EMPTY_VALUE;
         }
 
@@ -293,7 +270,7 @@ public class CorrelationScore {
 
         //check if all values are equal
         Set<Integer> values = new HashSet<>(candidates.values());
-        if (candidates.values().size()>1 && values.size() == 1) {
+        if (candidates.values().size() > 1 && values.size() == 1) {
             return 0;
         }
 
@@ -305,6 +282,24 @@ public class CorrelationScore {
                     }
                 }).getKey();
         return popular;
+    }
+
+    /**
+     * @param gender Eg. "male", "M" etc.
+     * @return 0 if male, 1 if female
+     */
+    public static int getGenderClass(String gender) {
+        int targetGender = 0;
+        for (int j = 0; j < Constant.Attribute.Gender.TARGET_CLASSES.length; j++) {
+            String[] targetClassValues = Constant.Attribute.Gender.TARGET_CLASSES[j];
+            for (String s : targetClassValues) {
+                if (gender.equals(s)) {
+                    targetGender = j;
+                    break;
+                }
+            }
+        }
+        return targetGender;
     }
 
 }
