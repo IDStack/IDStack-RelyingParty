@@ -217,17 +217,17 @@ public class APIHandler {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         if (jsonUrl.isEmpty())
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
-        return feature.getDocumentByUrl(storeFilePath, pubFilePath, jsonUrl);
+        return feature.getDocumentByUrl(storeFilePath, pubFilePath, jsonUrl, tmpFilePath);
     }
 
-    @RequestMapping(value = "/{version}/{apikey}/getcertdetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{version}/{apikey}/cleardocstore", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String getCertDetails(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "cert_url") String certUrl) {
+    public String clearDocStore(@PathVariable("version") String version, @PathVariable("apikey") String apikey) throws IOException {
         if (!feature.validateRequest(version))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
         if (!feature.validateRequest(apiKey, apikey))
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        return feature.getCertificateDetails(certUrl, tmpFilePath);
+        return feature.clearDocStore(configFilePath, storeFilePath);
     }
 
     //*************************************************** PUBLIC API ***************************************************
