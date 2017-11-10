@@ -57,7 +57,7 @@ public class Router {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
         }
 
-        return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(document)));
+        return new Gson().toJson(new ConfidenceScore().getSingleDocumentScore(document));
     }
 
     protected String getConfidenceScoreByUrl(String jsonUrl, String pubFilePath) {
@@ -76,7 +76,7 @@ public class Router {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
         }
 
-        return new Gson().toJson(Collections.singletonMap(Constant.SCORE, new ConfidenceScore().getSingleDocumentScore(document)));
+        return new Gson().toJson(new ConfidenceScore().getSingleDocumentScore(document));
     }
 
     protected String getCorrelationScore(String json) {
@@ -147,7 +147,7 @@ public class Router {
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
                 }
 
-                String hashInJson = document.getMetaData().getPdfHash();
+                String hashInJson = document.getMetaData().getPdf();
 
                 //TODO : uncomment after modifying hashing mechanism
                 if (!(hashInJson.equals(hashInPdf))) {
