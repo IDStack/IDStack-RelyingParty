@@ -217,7 +217,7 @@ public class APIHandler {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
         if (jsonUrl.isEmpty())
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
-        return feature.getDocumentByUrl(storeFilePath, pubFilePath, jsonUrl);
+        return feature.getDocumentByUrl(storeFilePath, pubFilePath, jsonUrl, tmpFilePath);
     }
 
     @RequestMapping(value = "/{version}/{apikey}/cleardocstore", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
