@@ -26,7 +26,7 @@ public class TranscriptTest extends DocumentTest {
         //get details
         Date dob = getDate(content.get("date_of_birth"));
         String dobName = "Date of Birth";
-        Date dateIssued = getDate(content.get("date_of_issue"));
+        Date dateIssued = getDate(content.get("issued_date"));
         String dateIssuedName = "Date of Issue";
         Date dateGraduation = getDate(content.get("date_of_graduation"));
         String dateGraduationName = "Date of Graduation";
