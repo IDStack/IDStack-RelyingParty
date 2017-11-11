@@ -90,24 +90,6 @@ public class APIHandler {
     }
 
     /**
-     * Evaluate the confidence score of single json document
-     *
-     * @param version api version
-     * @param apikey  api key
-     * @param json    signed json
-     * @return confidence score
-     */
-    @RequestMapping(value = "/{version}/{apikey}/confidence", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public String getConfidenceScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
-        if (!feature.validateRequest(version))
-            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
-            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        return router.getConfidenceScore(json);
-    }
-
-    /**
      * Evaluate the confidence score of single json document. Json document is sent as a URL
      *
      * @param version api version
@@ -125,24 +107,6 @@ public class APIHandler {
         if (jsonUrl.isEmpty())
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
         return router.getConfidenceScoreByUrl(jsonUrl, pubFilePath);
-    }
-
-    /**
-     * Evaluate the correlation score of set of json documents
-     *
-     * @param version api version
-     * @param apikey  api key
-     * @param json    signed set of jsons
-     * @return correlation score
-     */
-    @RequestMapping(value = "/{version}/{apikey}/correlation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public String getCorrelationScore(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
-        if (!feature.validateRequest(version))
-            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
-            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        return router.getCorrelationScore(json);
     }
 
     /**

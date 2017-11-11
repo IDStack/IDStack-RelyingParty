@@ -49,17 +49,6 @@ public class Router {
     @Autowired
     private SignatureVerifier signatureVerifier;
 
-    protected String getConfidenceScore(String json) {
-        Document document;
-        try {
-            document = Parser.parseDocumentJson(json);
-        } catch (Exception e) {
-            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
-        }
-
-        return new Gson().toJson(new ConfidenceScore().getSingleDocumentScore(document));
-    }
-
     protected String getConfidenceScoreByUrl(String jsonUrl, String pubFilePath) {
         String json;
         try {
@@ -77,14 +66,6 @@ public class Router {
         }
 
         return new Gson().toJson(new ConfidenceScore().getSingleDocumentScore(document));
-    }
-
-    protected String getCorrelationScore(String json) {
-        JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
-        CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
-        if (csr == null)
-            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
-        return new Gson().toJson(csr);
     }
 
     protected String getCorrelationScoreByRequestId(FeatureImpl feature, String storeFilePath, String configFilePath, String requestId) {
