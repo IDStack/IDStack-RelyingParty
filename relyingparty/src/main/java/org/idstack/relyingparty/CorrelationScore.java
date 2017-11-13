@@ -216,7 +216,6 @@ public class CorrelationScore {
                     candidates.put(targetClass, count != null ? count + 1 : 1);
                     isGenderSet = true;
                     break;
-//                } else {
 
                 }
             }
@@ -299,7 +298,7 @@ public class CorrelationScore {
         for (int j = 0; j < Constant.Attribute.Gender.TARGET_CLASSES.length; j++) {
             String[] targetClassValues = Constant.Attribute.Gender.TARGET_CLASSES[j];
             for (String s : targetClassValues) {
-                if (gender.equals(s)) {
+                if (gender.toLowerCase().equals(s)) {
                     targetGender = j + 1;
                     break;
                 }

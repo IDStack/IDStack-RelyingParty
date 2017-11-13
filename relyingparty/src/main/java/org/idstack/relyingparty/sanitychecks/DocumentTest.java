@@ -91,7 +91,7 @@ public class DocumentTest {
     public TestResult checkNicGenderValidity(String nic, int gender) {
         String message = "NIC match with Gender";
         int nicValue = Integer.parseInt(nic.substring(2, 5));
-        int nicGender = nicValue < 500 ? 0 : 1;
+        int nicGender = nicValue < 500 ? 1 : 2;
         TestResult testResult = new TestResult(message, gender == nicGender);
         return testResult;
     }
