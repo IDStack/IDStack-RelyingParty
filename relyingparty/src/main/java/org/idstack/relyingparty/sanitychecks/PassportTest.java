@@ -4,7 +4,9 @@ import org.idstack.feature.document.Document;
 import org.idstack.relyingparty.CorrelationScore;
 import org.idstack.relyingparty.response.confidence.TestResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
 
 /**
  * @author Sachithra Dangalla
@@ -24,11 +26,11 @@ public class PassportTest extends DocumentTest {
         LinkedHashMap<String, String> content = this.getDocument().getContent();
 
         //get details
-        String passportType = content.get("passport_type");
-        String passportNo = content.get("passport_no");
-        String countryCode = content.get("country_code");
-        String nic = content.get("id_no");
-        int gender = CorrelationScore.getGenderClass(content.get("sex"));
+        String passportType = content.get("passport_type").toLowerCase();
+        String passportNo = content.get("passport_no").toLowerCase();
+        String countryCode = content.get("country_code").toLowerCase();
+        String nic = content.get("id_no").toLowerCase();
+        int gender = CorrelationScore.getGenderClass(content.get("sex").toLowerCase());
         Date dob = getDate(content.get("date_of_birth"));
         String dobName = "Date of Birth";
         Date dateIssued = getDate(content.get("date_of_issue"));
