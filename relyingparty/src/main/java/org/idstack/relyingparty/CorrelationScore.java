@@ -56,7 +56,7 @@ public class CorrelationScore {
 //        Map<String, String> flatAttributeMap = new HashMap<>();
 
         for (String attributeName : attribute.getRight()) {
-            String nameSeg = content.get(attributeName);
+            String nameSeg = content.get(attributeName).toLowerCase();
             if (nameSeg != null) {
                 sb.add(nameSeg);
             }
@@ -203,6 +203,7 @@ public class CorrelationScore {
             Document doc = docs[i];
             String gender = this.EMPTY_VALUE;
             //iterate over "gender" attributes
+            boolean isGenderSet = false;
             for (String attributeName : Constant.Attribute.SEX.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
                     gender = doc.getContent().get(attributeName).toLowerCase();
@@ -212,15 +213,20 @@ public class CorrelationScore {
                     genders[i] = targetClass;
 
                     Integer count = candidates.get(targetClass);
-                    candidates.put(targetClass + 1, count != null ? count + 1 : 1);
+                    candidates.put(targetClass, count != null ? count + 1 : 1);
+                    isGenderSet = true;
                     break;
-                } else {
-                    //there is no gender value for doc[i]
-                    genders[i] = -1;
-                    Integer count = candidates.get(0);
-                    candidates.put(0, count != null ? count + 1 : 1);
+//                } else {
+
                 }
             }
+            if (!isGenderSet) {
+                //there is no gender value for doc[i]
+                genders[i] = 0;
+                Integer count = candidates.get(0);
+                candidates.put(0, count != null ? count + 1 : 1);
+            }
+            System.out.println("Gender: " + gender);
             genderNames[i] = gender;
         }
 
@@ -286,7 +292,7 @@ public class CorrelationScore {
 
     /**
      * @param gender Eg. "male", "M" etc.
-     * @return 0 if male, 1 if female
+     * @return 1 if male, 2 if female
      */
     public static int getGenderClass(String gender) {
         int targetGender = 0;
@@ -294,7 +300,7 @@ public class CorrelationScore {
             String[] targetClassValues = Constant.Attribute.Gender.TARGET_CLASSES[j];
             for (String s : targetClassValues) {
                 if (gender.equals(s)) {
-                    targetGender = j;
+                    targetGender = j + 1;
                     break;
                 }
             }
