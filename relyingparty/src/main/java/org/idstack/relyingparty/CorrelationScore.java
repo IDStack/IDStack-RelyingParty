@@ -76,7 +76,6 @@ public class CorrelationScore {
         for (String attributeName : attribute.getRight()) {
             String nameSeg = content.get(attributeName);
             if (nameSeg != null) {
-                nameSeg = nameSeg.toLowerCase();
                 sb.add(nameSeg);
             }
         }
@@ -153,7 +152,7 @@ public class CorrelationScore {
         //select most popular nic
         String popular = "";
         if (!candidates.isEmpty()) {
-            popular = getPopularString(candidates);
+            popular = getPopularString(candidates, docsLength);
 
         }
         //set scores
@@ -170,15 +169,18 @@ public class CorrelationScore {
         int docsLength = docs.length;
         ArrayList<AttributeScore> attrScore = new ArrayList<>();
         String[] nics = new String[docsLength];
+        String[] originalnics = new String[docsLength];
         //count candidates with occurrences count
         Map<String, Integer> candidates = new HashMap<>();
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
             String nic = "";
+            String originalNIC = "";
             //iterate over "nic" attributes
             for (String attributeName : Constant.Attribute.NIC.getRight()) {
                 if (doc.getContent().get(attributeName) != null) {
-                    nic = doc.getContent().get(attributeName).toLowerCase();
+                    originalNIC = doc.getContent().get(attributeName);
+                    nic = originalNIC.toLowerCase();
                     Integer count = candidates.get(nic);
                     candidates.put(nic, count != null ? count + 1 : 1);
 
@@ -186,23 +188,25 @@ public class CorrelationScore {
                 }
             }
             if (nic.isEmpty()) {
-                nic = this.EMPTY_VALUE;
+                originalNIC = this.EMPTY_VALUE;
+                nic = nic.toLowerCase();
                 Integer count = candidates.get(nic);
                 candidates.put("", count != null ? count + 1 : 1);
             }
 
             nics[i] = nic;
+            originalnics[i] = originalNIC;
         }
 
         //select most popular nic
         String popular = "";
         if (!candidates.isEmpty()) {
-            popular = getPopularString(candidates);
+            popular = getPopularString(candidates, docsLength);
         }
         //set scores
         for (int i = 0; i < docs.length; i++) {
             double score = (!popular.equals(this.EMPTY_VALUE) && nics[i].equals(popular)) ? 100 : 0;
-            AttributeScore as = new AttributeScore(nics[i], score);
+            AttributeScore as = new AttributeScore(originalnics[i], score);
             attrScore.add(as);
         }
 
@@ -214,17 +218,22 @@ public class CorrelationScore {
         int docsLength = docs.length;
         int[] genders = new int[docsLength];
         String[] genderNames = new String[docsLength];
+        String[] originalGenderNames = new String[docsLength];
         ArrayList<AttributeScore> attrScore = new ArrayList<>();
         //count candidates with occurrences count
         Map<Integer, Integer> candidates = new HashMap<>();
         for (int i = 0; i < docs.length; i++) {
             Document doc = docs[i];
             String gender = this.EMPTY_VALUE;
+            String originalGender = this.EMPTY_VALUE;
             //iterate over "gender" attributes
             boolean isGenderSet = false;
             for (String attributeName : Constant.Attribute.SEX.getRight()) {
+
                 if (doc.getContent().get(attributeName) != null) {
-                    gender = doc.getContent().get(attributeName).toLowerCase();
+
+                    originalGender = doc.getContent().get(attributeName);
+                    gender = originalGender.toLowerCase();
 
                     //determine the target class of the value
                     int targetClass = getGenderClass(gender);
@@ -244,16 +253,17 @@ public class CorrelationScore {
                 candidates.put(0, count != null ? count + 1 : 1);
             }
             genderNames[i] = gender;
+            originalGenderNames[i] = originalGender;
         }
 
         if (!candidates.isEmpty()) {
             //select most popular gender
-            int popular = getPopularInt(candidates);
+            int popular = getPopularInt(candidates, docsLength);
 
             //set scores
             for (int i = 0; i < docs.length; i++) {
                 double score = (popular != 0 && genders[i] == popular) ? 100 : 0;
-                AttributeScore as = new AttributeScore(genderNames[i], score);
+                AttributeScore as = new AttributeScore(originalGenderNames[i], score);
                 attrScore.add(as);
             }
         }
@@ -261,13 +271,15 @@ public class CorrelationScore {
         return attrScore;
     }
 
-    private String getPopularString(Map<String, Integer> candidates) {
-        if (candidates.get(this.EMPTY_VALUE) != null && candidates.get(this.EMPTY_VALUE) >= candidates.size() / 2) {
+    private String getPopularString(Map<String, Integer> candidates, int docCount) {
+        Set<Integer> values = new HashSet<>(candidates.values());
+        double size = (double) docCount / 2;
+        if (candidates.get(this.EMPTY_VALUE) != null && candidates.get(this.EMPTY_VALUE) >= size) {
             return this.EMPTY_VALUE;
         }
 
         //check if all values are equal
-        Set<Integer> values = new HashSet<>(candidates.values());
+
         if (candidates.values().size() > 1 && values.size() == 1) {
             return this.EMPTY_VALUE;
         }
@@ -283,15 +295,18 @@ public class CorrelationScore {
         return popular;
     }
 
-    private int getPopularInt(Map<Integer, Integer> candidates) {
-        if (candidates.get(0) != null && candidates.get(0) >= candidates.size() / 2) {
+    private int getPopularInt(Map<Integer, Integer> candidates, int docCount) {
+        Set<Integer> values = new HashSet<>(candidates.values());
+        double size = (double) docCount / 2;
+
+        if (candidates.get(0) != null && candidates.get(0) >= size) {
             //if half or more entries are empty, the popular is the empty
             return 0;
 
         }
 
         //check if all values are equal
-        Set<Integer> values = new HashSet<>(candidates.values());
+
         if (candidates.values().size() > 1 && values.size() == 1) {
             return 0;
         }
