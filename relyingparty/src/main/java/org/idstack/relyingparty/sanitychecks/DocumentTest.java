@@ -98,6 +98,7 @@ public class DocumentTest {
 
     public TestResult checkNICFormat(String nic) {
         //TODO check multiple formats
+        nic = nic.toUpperCase();
         String message = " NIC format";
         int year = Integer.parseInt(nic.substring(0, 2)) + 1900;
         boolean status = false;
@@ -113,6 +114,9 @@ public class DocumentTest {
     }
 
     public TestResult checkPassportNumberFormat(String pType, String pNumber, String countryCode) {
+        pType = pType.toUpperCase();
+        pNumber = pNumber.toUpperCase();
+        countryCode = countryCode.toUpperCase();
         if (!countryCode.equals("LKA")) {
             return null;
         }
