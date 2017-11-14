@@ -24,6 +24,24 @@ public class CorrelationScore {
     public static final String EMPTY_VALUE = "-";
 
     /**
+     * @param gender Eg. "male", "M" etc.
+     * @return 1 if male, 2 if female
+     */
+    public static int getGenderClass(String gender) {
+        int targetGender = 0;
+        for (int j = 0; j < Constant.Attribute.Gender.TARGET_CLASSES.length; j++) {
+            String[] targetClassValues = Constant.Attribute.Gender.TARGET_CLASSES[j];
+            for (String s : targetClassValues) {
+                if (gender.toLowerCase().equals(s)) {
+                    targetGender = j + 1;
+                    break;
+                }
+            }
+        }
+        return targetGender;
+    }
+
+    /**
      * @param documentJSONs
      * @return a map of String keys and double[] values (array of name scores of documents)
      */
@@ -56,8 +74,9 @@ public class CorrelationScore {
 //        Map<String, String> flatAttributeMap = new HashMap<>();
 
         for (String attributeName : attribute.getRight()) {
-            String nameSeg = content.get(attributeName).toLowerCase();
+            String nameSeg = content.get(attributeName);
             if (nameSeg != null) {
+                nameSeg = nameSeg.toLowerCase();
                 sb.add(nameSeg);
             }
         }
@@ -84,7 +103,6 @@ public class CorrelationScore {
 
         return nameScores;
     }
-
 
     private ArrayList<AttributeScore> getAddressCorrelationScore(Document[] docs) {
         ArrayList<String> names = new ArrayList<>();
@@ -225,7 +243,6 @@ public class CorrelationScore {
                 Integer count = candidates.get(0);
                 candidates.put(0, count != null ? count + 1 : 1);
             }
-            System.out.println("Gender: " + gender);
             genderNames[i] = gender;
         }
 
@@ -287,24 +304,6 @@ public class CorrelationScore {
                     }
                 }).getKey();
         return popular;
-    }
-
-    /**
-     * @param gender Eg. "male", "M" etc.
-     * @return 1 if male, 2 if female
-     */
-    public static int getGenderClass(String gender) {
-        int targetGender = 0;
-        for (int j = 0; j < Constant.Attribute.Gender.TARGET_CLASSES.length; j++) {
-            String[] targetClassValues = Constant.Attribute.Gender.TARGET_CLASSES[j];
-            for (String s : targetClassValues) {
-                if (gender.toLowerCase().equals(s)) {
-                    targetGender = j + 1;
-                    break;
-                }
-            }
-        }
-        return targetGender;
     }
 
 }
