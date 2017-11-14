@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.Parser;
@@ -23,6 +25,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -76,19 +80,18 @@ public class Router {
         for (int i = 0; i < jsonList.size(); i++) {
             JsonObject doc = jsonList.get(i).getAsJsonObject();
 
-            // TODO: uncomment after fixing the issue
-//            try {
-//                boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(doc.toString(), tmpFilePath);
-//                if (!isValidExtractor)
-//                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_EXTRACTOR_SIGNATURE));
-//
-//                ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(doc.toString(), tmpFilePath);
-//                if (isValidValidators.contains(false))
-//                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VALIDATOR_SIGNATURE));
-//
-//            } catch (OperatorCreationException | CMSException | IOException | GeneralSecurityException e) {
-//                throw new RuntimeException(e);
-//            }
+            try {
+                boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(doc.toString(), tmpFilePath);
+                if (!isValidExtractor)
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_EXTRACTOR_SIGNATURE));
+
+                ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(doc.toString(), tmpFilePath);
+                if (isValidValidators.contains(false))
+                    return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VALIDATOR_SIGNATURE));
+
+            } catch (OperatorCreationException | CMSException | IOException | GeneralSecurityException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         for (int i = 1; i <= jsonList.size(); i++) {
