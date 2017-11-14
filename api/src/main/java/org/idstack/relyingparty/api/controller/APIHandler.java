@@ -194,6 +194,16 @@ public class APIHandler {
         return feature.clearDocStore(configFilePath, storeFilePath);
     }
 
+    @RequestMapping(value = "/{version}/{apikey}/sendstatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String sendEmail(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "request_id") String requestId, @RequestParam(value = "status") String status, @RequestParam(value = "message") String message) {
+        if (!feature.validateRequest(version))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
+        if (!feature.validateRequest(apiKey, apikey))
+            return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        return router.sendEmail(feature, requestId, status, message, configFilePath, storeFilePath);
+    }
+
     //*************************************************** PUBLIC API ***************************************************
 
     /**

@@ -9,6 +9,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.idstack.feature.Constant;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.Parser;
+import org.idstack.feature.configuration.BasicConfig;
 import org.idstack.feature.document.Document;
 import org.idstack.feature.document.MetaData;
 import org.idstack.feature.verification.ExtractorVerifier;
@@ -102,5 +103,12 @@ public class Router {
         }
 
         return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.SUCCESS));
+    }
+
+    protected String sendEmail(FeatureImpl feature, String requestId, String status, String message, String configFilePath, String storeFilePath) {
+        BasicConfig basicConfig = (BasicConfig) feature.getConfiguration(configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME);
+        String body = feature.populateEmailBodyForRelyingParty(requestId, status.toUpperCase(), message, basicConfig);
+        String response = feature.sendEmail(feature.getEmailByRequestId(storeFilePath, requestId), "RELYING PARTY - IDStack Document Evaluation", body);
+        return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, response));
     }
 }
