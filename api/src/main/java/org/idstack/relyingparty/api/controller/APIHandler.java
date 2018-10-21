@@ -7,13 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Chanaka Lakmal
@@ -64,10 +70,12 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/saveconfig/basic", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String saveConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestBody String json) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        }
         return feature.saveBasicConfiguration(configFilePath, json);
     }
 
@@ -81,10 +89,12 @@ public class APIHandler {
     @RequestMapping(value = {"/{version}/{apikey}/getconfig/basic"}, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getConfiguration(@PathVariable("version") String version, @PathVariable("apikey") String apikey) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        }
         return new Gson().toJson(feature.getConfiguration(configFilePath, Constant.Configuration.BASIC_CONFIG_FILE_NAME));
     }
 
@@ -99,12 +109,15 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/confidence/url", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getConfidenceScoreByUrl(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "json_url") String jsonUrl) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        if (jsonUrl.isEmpty())
+        }
+        if (jsonUrl.isEmpty()) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
+        }
         return router.getConfidenceScoreByUrl(jsonUrl, pubFilePath);
     }
 
@@ -119,12 +132,15 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/correlation/request", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getCorrelationScoreByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "request_id") String requestId) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        if (requestId.isEmpty())
+        }
+        if (requestId.isEmpty()) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
+        }
         return router.getCorrelationScoreByRequestId(feature, storeFilePath, requestId);
     }
 
@@ -138,10 +154,12 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/getdocstore", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getStoredDocuments(@PathVariable("version") String version, @PathVariable("apikey") String apikey) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        }
         return feature.getDocumentStore(storeFilePath, configFilePath, false).replaceAll(pubFilePath, File.separator);
     }
 
@@ -155,12 +173,15 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/getdoc/request", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getStoredDocumentsByRequestId(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "request_id") String requestId) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        if (requestId.isEmpty())
+        }
+        if (requestId.isEmpty()) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
+        }
         return feature.getDocumentStore(storeFilePath, configFilePath, false, requestId).replaceAll(pubFilePath, File.separator);
     }
 
@@ -175,32 +196,39 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/{apikey}/getdoc/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getStoredDocument(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "json_url") String jsonUrl) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
-        if (jsonUrl.isEmpty())
+        }
+        if (jsonUrl.isEmpty()) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
+        }
         return feature.getDocumentByUrl(storeFilePath, pubFilePath, configFilePath, jsonUrl, tmpFilePath);
     }
 
     @RequestMapping(value = "/{version}/{apikey}/cleardocstore", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String clearDocStore(@PathVariable("version") String version, @PathVariable("apikey") String apikey) throws IOException {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        }
         return feature.clearDocStore(configFilePath, storeFilePath);
     }
 
     @RequestMapping(value = "/{version}/{apikey}/sendstatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String sendEmail(@PathVariable("version") String version, @PathVariable("apikey") String apikey, @RequestParam(value = "request_id") String requestId, @RequestParam(value = "status") String status, @RequestParam(value = "message") String message) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (!feature.validateRequest(apiKey, apikey))
+        }
+        if (!feature.validateRequest(apiKey, apikey)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_API_KEY));
+        }
         return router.sendEmail(feature, requestId, status, message, configFilePath, storeFilePath);
     }
 
@@ -217,10 +245,12 @@ public class APIHandler {
     @RequestMapping(value = "/{version}/evaluate", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String evaluateDocuments(@PathVariable("version") String version, @RequestParam(value = "json") String json, @RequestParam(value = "email") String email) {
-        if (!feature.validateRequest(version))
+        if (!feature.validateRequest(version)) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VERSION));
-        if (json.isEmpty() || email.isEmpty())
+        }
+        if (json.isEmpty() || email.isEmpty()) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_PARAMETER_NULL));
+        }
         return router.evaluateDocuments(feature, storeFilePath, configFilePath, json, email, tmpFilePath, pubFilePath);
     }
 }

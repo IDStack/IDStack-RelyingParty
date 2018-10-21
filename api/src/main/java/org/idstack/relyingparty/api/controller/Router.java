@@ -69,8 +69,9 @@ public class Router {
         String json = feature.getDocumentListByRequestId(storeFilePath, requestId);
         JsonArray jsonList = new JsonParser().parse(json).getAsJsonObject().get(Constant.JSON_LIST).getAsJsonArray();
         CorrelationScoreResponse csr = new CorrelationScore().getMultipleDocumentScore(jsonList);
-        if (csr == null)
+        if (csr == null) {
             return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_JSON_INVALID));
+        }
         return new Gson().toJson(csr);
     }
 
@@ -83,12 +84,14 @@ public class Router {
 
             try {
                 boolean isValidExtractor = extractorVerifier.verifyExtractorSignature(doc.toString(), tmpFilePath);
-                if (!isValidExtractor)
+                if (!isValidExtractor) {
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_EXTRACTOR_SIGNATURE));
+                }
 
                 ArrayList<Boolean> isValidValidators = signatureVerifier.verifyJson(doc.toString(), tmpFilePath);
-                if (isValidValidators.contains(false))
+                if (isValidValidators.contains(false)) {
                     return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, Constant.Status.ERROR_VALIDATOR_SIGNATURE));
+                }
 
             } catch (OperatorCreationException | CMSException | IOException | GeneralSecurityException e) {
                 throw new RuntimeException(e);
