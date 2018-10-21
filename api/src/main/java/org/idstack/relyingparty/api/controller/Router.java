@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.idstack.feature.Constant;
+import org.idstack.feature.Constant.Configuration;
 import org.idstack.feature.FeatureImpl;
 import org.idstack.feature.Parser;
 import org.idstack.feature.configuration.BasicConfig;
@@ -113,5 +114,16 @@ public class Router {
         String body = feature.populateEmailBodyForRelyingParty(requestId, status.toUpperCase(), message, basicConfig);
         String response = feature.sendEmail(feature.getEmailByRequestId(storeFilePath, requestId), "RELYING PARTY - IDStack Document Evaluation", body);
         return new Gson().toJson(Collections.singletonMap(Constant.Status.STATUS, response));
+    }
+
+    protected String getConfigFileName(String type) {
+        switch (type) {
+            case Constant.Configuration.BASIC_CONFIG:
+                return Constant.Configuration.BASIC_CONFIG_FILE_NAME;
+            case Configuration.AWS_CONFIG:
+                return Configuration.AWS_CONFIG_FILE_NAME;
+            default:
+                return null;
+        }
     }
 }
